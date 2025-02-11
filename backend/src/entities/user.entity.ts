@@ -1,5 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn, Unique} from "typeorm";
+import {BeforeInsert, Column, Entity, PrimaryGeneratedColumn, Unique} from "typeorm";
 import {UserRole} from "../types/UserRole";
+import {hashPassword} from "../util/hash";
 
 @Entity()
 @Unique(['email', 'username'])
@@ -30,5 +31,10 @@ export class User {
         }
     )
     role : "admin" | "user"
+
+    @BeforeInsert()
+    async hashPassword () {
+        this.password = await hashPassword(this.password)
+    }
 }
 

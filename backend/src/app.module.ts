@@ -17,7 +17,6 @@ import {TypeOrmModule} from "@nestjs/typeorm";
         database: 'quizzme',
         autoLoadEntities : true,
         synchronize: true,
-        logging : true
 
       })
     }),
