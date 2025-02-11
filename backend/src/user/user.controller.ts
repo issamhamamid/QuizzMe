@@ -1,6 +1,5 @@
 import {Body, Controller, Get, Post, UseInterceptors, UsePipes} from '@nestjs/common';
 import {UserService} from "./user.service";
-import {User} from "../entities/user.entity";
 import {createUserDto, createUserSchema} from "../dtos/createUserDto.dto";
 import {ZodValidationPipe} from "../customPipes/zodValidationPipe";
 import {UsersInterceptor} from "../interceptors/users.interceptors";
