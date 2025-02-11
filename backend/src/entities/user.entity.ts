@@ -2,7 +2,8 @@ import {Column, Entity, PrimaryGeneratedColumn, Unique} from "typeorm";
 import {UserRole} from "../types/UserRole";
 
 @Entity()
-@Unique(['email , username'])
+@Unique(['email', 'username'])
+
 
 export class User {
     @PrimaryGeneratedColumn()
@@ -16,6 +17,9 @@ export class User {
     username : string
 
     @Column()
+    password : string
+
+    @Column()
     email : string
 
     @Column(
@@ -25,5 +29,6 @@ export class User {
             default: UserRole.USER,
         }
     )
-    role : UserRole
+    role : "admin" | "user"
 }
+
