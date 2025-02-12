@@ -6,16 +6,21 @@ import {PassportModule} from "@nestjs/passport";
 import {JwtModule} from "@nestjs/jwt";
 import {LocalStrategy} from "./local.strategy";
 import {JwtStrategy} from "./jwt.strategy";
+import {JwtAuthGuard} from "../guards/jwt-guard";
+import {APP_GUARD} from "@nestjs/core";
 
 @Module({
-  providers: [AuthService , LocalStrategy , JwtStrategy],
+  providers: [AuthService , LocalStrategy , JwtStrategy ,  {
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard,
+  },],
   controllers: [AuthController],
   imports: [UserModule , PassportModule , JwtModule.registerAsync({
     useFactory: async () => ({
       secret: process.env.SECRET,  // This will always get the latest value
       signOptions: { expiresIn: '1h' },
     }),
-  }),],
+  }), ],
   exports : [AuthService]
 })
 export class AuthModule {}
