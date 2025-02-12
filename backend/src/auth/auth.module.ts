@@ -5,13 +5,16 @@ import {UserModule} from "../user/user.module";
 import {PassportModule} from "@nestjs/passport";
 import {JwtModule} from "@nestjs/jwt";
 import {LocalStrategy} from "./local.strategy";
+import {JwtStrategy} from "./jwt.strategy";
 
 @Module({
-  providers: [AuthService , LocalStrategy],
+  providers: [AuthService , LocalStrategy , JwtStrategy],
   controllers: [AuthController],
-  imports: [UserModule , PassportModule , JwtModule.register({
-    secret: 'test',
-    signOptions: { expiresIn: '60s' },
+  imports: [UserModule , PassportModule , JwtModule.registerAsync({
+    useFactory: async () => ({
+      secret: process.env.SECRET,  // This will always get the latest value
+      signOptions: { expiresIn: '1h' },
+    }),
   }),],
   exports : [AuthService]
 })

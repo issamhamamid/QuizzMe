@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { AuthModule } from './auth/auth.module';
+import * as process from "node:process";
+import {ConfigModule} from '@nestjs/config'
 
 @Module({
   imports: [UserModule ,
@@ -12,16 +14,21 @@ import { AuthModule } from './auth/auth.module';
 
         type: 'mysql',
         host: 'localhost',
-        port: 3306,
-        username: 'root',
-        password: '1234',
-        database: 'quizzme',
+        port: parseInt(process.env.DB_PORT || '3000') ,
+        username: process.env.DB_USERNAME  ,
+        password: process.env.DB_PASSWORD ,
+        database: process.env.DB_NAME ,
         autoLoadEntities : true,
         synchronize: true,
 
       })
     }),
     AuthModule,
+
+    ConfigModule.forRoot({
+      isGlobal : true ,
+      expandVariables : true
+    })
 
   ],
   controllers: [AppController],

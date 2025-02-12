@@ -7,4 +7,7 @@ import {LocalGuard} from "./guards/local.guad";
 export class AppController {
 
 
+    getHello() {
+        return undefined;
+    }
 }
