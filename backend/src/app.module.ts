@@ -6,9 +6,11 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import { AuthModule } from './auth/auth.module';
 import * as process from "node:process";
 import {ConfigModule} from '@nestjs/config'
+import { QuestionsModule } from './questions/questions.module';
+import {GatewayModule} from "./gateway/gateway.module";
 
 @Module({
-  imports: [UserModule ,
+  imports: [UserModule , GatewayModule ,
     TypeOrmModule.forRootAsync({
       useFactory : ()=>({
 
@@ -28,7 +30,9 @@ import {ConfigModule} from '@nestjs/config'
     ConfigModule.forRoot({
       isGlobal : true ,
       expandVariables : true
-    })
+    }),
+
+    QuestionsModule
 
   ],
   controllers: [AppController],
