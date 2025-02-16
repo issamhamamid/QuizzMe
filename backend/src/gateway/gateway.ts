@@ -3,17 +3,19 @@ import {Inject, OnModuleInit, UseInterceptors} from "@nestjs/common";
 import  {Server , Socket} from 'socket.io'
 import {QuestionsService} from "../questions/questions.service";
 import {Question} from "../entities/question.entity";
-import {CACHE_MANAGER} from "@nestjs/cache-manager";
-import { Cache } from 'cache-manager';
-import {CacheInterceptor} from "@nestjs/cache-manager";
+import Redis from "ioredis";
+import {getRoom} from "../util/getRoom";
 
 
 
 @WebSocketGateway()
 export class RoomGateWay implements OnModuleInit{
 
-    constructor( @Inject(CACHE_MANAGER) private cacheManager : Cache
-        , private questionsService : QuestionsService) {
+
+
+
+    constructor( @Inject('REDIS_CLIENT') private readonly redisClient: Redis ,  private questionsService : QuestionsService) {
+
     }
 
     @WebSocketServer()
@@ -24,6 +26,8 @@ export class RoomGateWay implements OnModuleInit{
 
              })
     }
+
+
 
     @SubscribeMessage('join-room')
     async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
@@ -50,32 +54,47 @@ export class RoomGateWay implements OnModuleInit{
 
     @SubscribeMessage('start-game')
     async startGame(@ConnectedSocket() client: Socket) {
-        let curRoom: string = "";
 
-        for (const room of Array.from(client.rooms)) {
-            if (room !== client.id) {
-                curRoom = room;
-            }
-        }
+        const curRoom = getRoom(client)
+
 
         if (curRoom) {
             const questions: Question[] = await this.questionsService.generateRoomQuestion();
             if (questions.length === 0) return; // Prevent errors if no questions
-
+            const roomData = {
+                'created_at' : Date.now(),
+                'questions' : JSON.stringify(questions),
+                'isActive' : true
+            }
+            await this.redisClient.hset(`room:${curRoom}`, roomData);
             let currentQuestionIndex = 0;
             let timerCount = 3;
+            let roundTimer = 15;
             let interval: NodeJS.Timeout;
 
             this.server.to(curRoom).emit("currentQuestion", questions[currentQuestionIndex]);
+            let leaderboardShown = false
 
-            const gameLoop = () => {
+            const gameLoop = async () => {
+
+
                 if (timerCount > 0) {
-                    this.server.to(curRoom).emit("timer", timerCount);
+                   this.server.to(curRoom).emit("timer", timerCount);
+                    timerCount--;
+
                 }
 
-                if (timerCount === 0) {
-                    currentQuestionIndex++;
 
+                if( !leaderboardShown && (timerCount === 0 || !!await this.redisClient.get(`room:${curRoom}:player:ismm:answer`))){
+                    const answer = await this.redisClient.get(`room:${curRoom}:player:ismm:answer`)
+                    this.server.to(curRoom).emit("leaderboard", answer);
+                    // TODO  : create leaderboard from answers and emit it
+                    leaderboardShown = true
+
+                }
+
+                if (roundTimer === 0) {
+                    currentQuestionIndex++;
                     if (currentQuestionIndex >= questions.length) {
                         clearInterval(interval);
                         return;
@@ -83,10 +102,14 @@ export class RoomGateWay implements OnModuleInit{
 
 
                     this.server.to(curRoom).emit("currentQuestion", questions[currentQuestionIndex]);
-                    timerCount = 4; // Reset timer for the next question
+                    roundTimer = 16;
+                    timerCount = 3; // Reset timer for the next question
+                    leaderboardShown = false
+
                 }
 
-                timerCount--;
+
+                roundTimer--;
             };
 
             interval = setInterval(gameLoop, 1000);
@@ -94,13 +117,17 @@ export class RoomGateWay implements OnModuleInit{
     }
 
 
-    @SubscribeMessage('test')
-    async test( @MessageBody() message  : string){
-            await this.cacheManager.set('test', 'fdfdfd');
-            const value = await this.cacheManager.get('test')
-            console.log(value)
-            return message
+    @SubscribeMessage('submit-answer')
+    async submitAnswer(@MessageBody() user : any , @ConnectedSocket() client  : Socket){
+        const curRoom = getRoom(client)
+        if(curRoom && await this.redisClient.hget(`room:${curRoom}` , 'isActive' )){
+                await this.redisClient.set(`room:${curRoom}:player:${user.username}:answer` , user.answer)
+
+        }
+
     }
+
+
 
 
 }

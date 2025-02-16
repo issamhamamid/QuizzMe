@@ -10,6 +10,7 @@ import { QuestionsModule } from './questions/questions.module';
 import {GatewayModule} from "./gateway/gateway.module";
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv } from '@keyv/redis';
+import { RedisModule } from './redis/redis.module';
 import  * as  redisStore from "cache-manager-redis-store";
 
 
@@ -41,6 +42,8 @@ import  * as  redisStore from "cache-manager-redis-store";
     }),
 
     QuestionsModule,
+
+    RedisModule,
 
   ],
   controllers: [AppController],

@@ -11,15 +11,6 @@ import { createKeyv } from '@keyv/redis';
 
 @Module({
     providers : [RoomGateWay] ,
-    imports : [QuestionsModule , TypeOrmModule.forFeature([Question , Proposition])  ,
-        CacheModule.registerAsync({
-            useFactory: async () => {
-                return {
-                    stores : [createKeyv('redis://localhost:6379')],
-
-                };
-            },
-        }),
-    ]
+    imports : [QuestionsModule , TypeOrmModule.forFeature([Question , Proposition])]
 })
 export class GatewayModule {}

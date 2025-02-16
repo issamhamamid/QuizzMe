@@ -22,4 +22,11 @@ export class QuestionsService {
         }).slice(0 , 6)
 
     }
+
+
+     verifyAnswer(userAnswer : string , question : Question) : boolean {
+        return userAnswer === question.answer
+    }
+
+
 }
