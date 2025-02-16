@@ -8,6 +8,14 @@ import * as process from "node:process";
 import {ConfigModule} from '@nestjs/config'
 import { QuestionsModule } from './questions/questions.module';
 import {GatewayModule} from "./gateway/gateway.module";
+import { CacheModule } from '@nestjs/cache-manager';
+import { createKeyv } from '@keyv/redis';
+import  * as  redisStore from "cache-manager-redis-store";
+
+
+
+
+
 
 @Module({
   imports: [UserModule , GatewayModule ,
@@ -32,7 +40,7 @@ import {GatewayModule} from "./gateway/gateway.module";
       expandVariables : true
     }),
 
-    QuestionsModule
+    QuestionsModule,
 
   ],
   controllers: [AppController],

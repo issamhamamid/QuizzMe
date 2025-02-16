@@ -4,7 +4,6 @@ import {Request} from "express";
 import {Reflector} from "@nestjs/core";
 import {Role} from "../decorators/role.decorator";
 import {UserService} from "../user/user.service";
-import {User} from "../entities/user.entity";
 
 
 @Injectable()
