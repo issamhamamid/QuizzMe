@@ -5,6 +5,7 @@ import {QuestionsService} from "../questions/questions.service";
 import {Question} from "../entities/question.entity";
 import Redis from "ioredis";
 import {getRoom} from "../util/getRoom";
+import {use} from "passport";
 
 
 
@@ -32,6 +33,7 @@ export class RoomGateWay implements OnModuleInit{
     @SubscribeMessage('join-room')
     async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
             await client.join(data.room)
+            await this.redisClient.sadd(`${data.room}:players` , data.username )
             this.server.to(data.room).emit("joining" , `${data.username} joined the room`)
     }
 
@@ -68,7 +70,7 @@ export class RoomGateWay implements OnModuleInit{
             }
             await this.redisClient.hset(`room:${curRoom}`, roomData);
             let currentQuestionIndex = 0;
-            let timerCount = 3;
+            let questionTimer = 3;
             let roundTimer = 15;
             let interval: NodeJS.Timeout;
 
@@ -78,18 +80,20 @@ export class RoomGateWay implements OnModuleInit{
             const gameLoop = async () => {
 
 
-                if (timerCount > 0) {
-                   this.server.to(curRoom).emit("timer", timerCount);
-                    timerCount--;
+
+
+                if( !leaderboardShown && (questionTimer === 0 || await this.didEveryoneSubmit(curRoom))){
+
+                    this.server.to(curRoom).emit("leaderboard", 'dd');
+                     this.redisClient.del('room1:answers')
+                    // TODO  : create leaderboard from answers and emit it
+                    leaderboardShown = true
 
                 }
 
-
-                if( !leaderboardShown && (timerCount === 0 || !!await this.redisClient.get(`room:${curRoom}:player:ismm:answer`))){
-                    const answer = await this.redisClient.get(`room:${curRoom}:player:ismm:answer`)
-                    this.server.to(curRoom).emit("leaderboard", answer);
-                    // TODO  : create leaderboard from answers and emit it
-                    leaderboardShown = true
+                if (questionTimer > 0) {
+                    this.server.to(curRoom).emit("timer", questionTimer);
+                    questionTimer--;
 
                 }
 
@@ -103,7 +107,7 @@ export class RoomGateWay implements OnModuleInit{
 
                     this.server.to(curRoom).emit("currentQuestion", questions[currentQuestionIndex]);
                     roundTimer = 16;
-                    timerCount = 3; // Reset timer for the next question
+                    questionTimer = 3; // Reset timer for the next question
                     leaderboardShown = false
 
                 }
@@ -121,9 +125,18 @@ export class RoomGateWay implements OnModuleInit{
     async submitAnswer(@MessageBody() user : any , @ConnectedSocket() client  : Socket){
         const curRoom = getRoom(client)
         if(curRoom && await this.redisClient.hget(`room:${curRoom}` , 'isActive' )){
-                await this.redisClient.set(`room:${curRoom}:player:${user.username}:answer` , user.answer)
+                await this.redisClient.hset(`${curRoom}:answers` ,`${user.username}`, user.answer)
 
         }
+
+    }
+
+
+    async didEveryoneSubmit (curRoom : string) : Promise<boolean>{
+        const answers = await this.redisClient.hgetall('room1:answers')
+        const submittedArray = Object.keys(answers)
+        const roomPlayers = await  this.redisClient.smembers(`${curRoom}:players`)
+        return submittedArray.length == roomPlayers.length
 
     }
 
