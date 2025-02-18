@@ -1,10 +1,18 @@
-import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
+import {
+    ConnectedSocket,
+    MessageBody,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
+    WsException
+} from "@nestjs/websockets";
 import {Inject, OnModuleInit} from "@nestjs/common";
 import  {Server , Socket} from 'socket.io'
 import {QuestionsService} from "../questions/questions.service";
 import {Question} from "../entities/question.entity";
 import Redis from "ioredis";
 import {getRoom} from "../util/getRoom";
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -31,11 +39,30 @@ export class RoomGateWay implements OnModuleInit{
 
 
 
+
+    @SubscribeMessage('create-room')
+    async createRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any){
+            const roomId = uuidv4()
+            await client.join(roomId)
+            await this.redisClient.sadd(`${roomId}:players` , data.username );
+            const roomData = {
+                'room_admin' : data.username,
+            }
+            await this.redisClient.hset(`room:${roomId}`, roomData);
+            this.server.to(roomId).emit("new-room" ,roomId )
+    }
+
     @SubscribeMessage('join-room')
     async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
-            await client.join(data.room)
-            await this.redisClient.sadd(`${data.room}:players` , data.username )
-            this.server.to(data.room).emit("joining" , `${data.username} joined the room`)
+            if(await this.redisClient.hgetall(`room:${data.room}`)){
+                await client.join(data.room)
+                await this.redisClient.sadd(`${data.room}:players` , data.username )
+                this.server.to(data.room).emit("joining" , `${data.username} joined the room`)
+            }
+            else {
+                throw new  WsException('this room doesnt exist')
+            }
+
     }
 
     @SubscribeMessage('leave-room')
@@ -94,7 +121,6 @@ export class RoomGateWay implements OnModuleInit{
                     const new_scores = await this.updateScores(curRoom);
                     this.server.to(curRoom).emit("leaderboard", new_scores);
                     this.redisClient.del('room1:answers');
-                    // TODO: create leaderboard from answers and emit it
                     leaderboardShown = true;
                 }
 
@@ -127,6 +153,12 @@ export class RoomGateWay implements OnModuleInit{
             interval = setInterval(gameLoop, 1000);
 
         }
+
+        else {
+            throw new WsException('You arent in a room' )
+        }
+
+
     }
 
 
@@ -136,6 +168,10 @@ export class RoomGateWay implements OnModuleInit{
         if(curRoom && await this.redisClient.hget(`room:${curRoom}` , 'isActive' )){
                 await this.redisClient.hset(`${curRoom}:answers` ,`${user.username}`, user.answer)
 
+        }
+
+        else {
+            throw new WsException('You arent in a room')
         }
 
     }
@@ -170,6 +206,12 @@ export class RoomGateWay implements OnModuleInit{
 
     }
 
+
+
+    @SubscribeMessage('trigger')
+    triggerErr(){
+        throw new WsException('Invalid credentials.');
+            }
 
 
 
