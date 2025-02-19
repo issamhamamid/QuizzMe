@@ -11,7 +11,6 @@ import  {Server , Socket} from 'socket.io'
 import {QuestionsService} from "../questions/questions.service";
 import {Question} from "../entities/question.entity";
 import Redis from "ioredis";
-import {getRoom} from "../util/getRoom";
 import { v4 as uuidv4 } from 'uuid';
 import {WebSocketConnectionMiddleware} from "../middlewares/sockets.middleware";
 
@@ -22,7 +21,7 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
 
     private QUESTION_TIME =15;
-    private ROUND_TIME = 20;
+
 
 
 
@@ -66,16 +65,26 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
                 throw new WsException("You are already in a room")
             }
 
-            if(Object.keys(await this.redisClient.hgetall(`room:${data.room}`)).length>0){
+            const roomData = await this.redisClient.hgetall(`room:${data.room}`)
 
-                await client.join(data.room)
-                client.data.room = data.room
-                await this.redisClient.sadd(`${data.room}:players` , client.data.username )
-                this.server.to(data.room).emit("joining" , `${client.data.username} joined the room`)
-            }
-            else {
+
+            if(!(Object.keys(roomData).length>0)){
+
                 throw new  WsException('this room doesnt exist')
+
             }
+
+            if (roomData.isActive) {
+                throw new WsException("The game is already in progress.");
+            }
+
+
+
+            await client.join(data.room)
+            client.data.room = data.room
+            await this.redisClient.sadd(`${data.room}:players` , client.data.username )
+            this.server.to(data.room).emit("joining" , `${client.data.username} joined the room`)
+
 
     }
 
@@ -106,7 +115,6 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
         if (curRoom) {
             const questions: Question[] = await this.questionsService.generateRoomQuestion();
-            console.log(questions[0].answer)
             if (questions.length === 0) return; // Prevent errors if no questions
             const roomData = {
                 'created_at' : Date.now(),
@@ -119,37 +127,45 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
             let currentQuestionIndex = 0;
             let questionTimer = this.QUESTION_TIME;
-            let roundTimer = this.ROUND_TIME;
+
             let interval: NodeJS.Timeout;
 
             this.server.to(curRoom).emit("currentQuestion", questions[currentQuestionIndex]);
             let leaderboardShown = false
 
             let isProcessing = false;  // Flag to check if the game loop is already processing an iteration
+            let leaderboardTimer : null | number = null
 
             const gameLoop = async () => {
                 if (isProcessing) return;  // If an iteration is already in progress, skip this one
 
                 isProcessing = true;  // Set flag to indicate processing has started
 
+
+                if(leaderboardTimer){
+                    leaderboardTimer--
+                }
+
                 if (!leaderboardShown && (questionTimer === 0 || await this.didEveryoneSubmit(curRoom))) {
                     const new_scores = await this.updateScores(curRoom);
                     this.server.to(curRoom).emit("leaderboard", new_scores);
                     await this.redisClient.del(`${client.data.room}:answers`);
                     leaderboardShown = true;
+                    leaderboardTimer = 5;
                 }
 
-
-                if (questionTimer > 0) {
+                if (questionTimer > 0 && leaderboardTimer===null) {
                     this.server.to(curRoom).emit("timer", questionTimer);
                     questionTimer--;
                 }
 
-                if (roundTimer === 0) {
+                if (leaderboardTimer===0 ) {
                     currentQuestionIndex++;
 
                     if (currentQuestionIndex >= questions.length) {
                         clearInterval(interval);
+                        const final_scores = await this.redisClient.hgetall(`${curRoom}:scores`);
+                        this.server.to(curRoom).emit("final_leaderboard", final_scores);
                         await this.redisClient.del(`room:${client.data.room}`)
                         await this.redisClient.del(`${client.data.room}:players`);
                         await this.redisClient.del(`${client.data.room}:scores`);
@@ -161,12 +177,15 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
                     this.server.to(curRoom).emit("currentQuestion", questions[currentQuestionIndex]);
                     await this.redisClient.hset(`room:${curRoom}` , 'current_question' ,JSON.stringify(questions[currentQuestionIndex]) )
-                    roundTimer = this.ROUND_TIME + 1;
+
                     questionTimer = this.QUESTION_TIME; // Reset timer for the next question
                     leaderboardShown = false;
+                    leaderboardTimer=null;
                 }
 
-                roundTimer--;
+
+
+
 
                 isProcessing = false;  // Reset flag after processing the current iteration
             };
