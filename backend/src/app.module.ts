@@ -8,10 +8,7 @@ import * as process from "node:process";
 import {ConfigModule} from '@nestjs/config'
 import { QuestionsModule } from './questions/questions.module';
 import {GatewayModule} from "./gateway/gateway.module";
-import { CacheModule } from '@nestjs/cache-manager';
-import { createKeyv } from '@keyv/redis';
 import { RedisModule } from './redis/redis.module';
-import  * as  redisStore from "cache-manager-redis-store";
 
 
 

@@ -1,6 +1,6 @@
 import {
     ConnectedSocket,
-    MessageBody,
+    MessageBody, OnGatewayDisconnect, OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
@@ -13,40 +13,48 @@ import {Question} from "../entities/question.entity";
 import Redis from "ioredis";
 import {getRoom} from "../util/getRoom";
 import { v4 as uuidv4 } from 'uuid';
+import {WebSocketConnectionMiddleware} from "../middlewares/sockets.middleware";
 
 
 
 @WebSocketGateway()
-export class RoomGateWay implements OnModuleInit{
+export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
 
     private QUESTION_TIME =15;
     private ROUND_TIME = 20;
 
 
-    constructor( @Inject('REDIS_CLIENT') private readonly redisClient: Redis ,  private questionsService : QuestionsService ) {
+
+
+    constructor( private socketsMiddleware : WebSocketConnectionMiddleware , @Inject('REDIS_CLIENT') private readonly redisClient: Redis ,  private questionsService : QuestionsService ) {
 
     }
+
 
     @WebSocketServer()
     server : Server
 
-    onModuleInit() {
-         this.server.on('connection' , (socket)=>{
 
-             })
+    afterInit(server: Server): any {
+        server.use((socket, next) => this.socketsMiddleware.use(socket, next));
     }
 
+    async handleDisconnect(client: Socket): Promise<void> {
+            if(!client.data.room) return ;
+            await this.redisClient.srem(`${client.data.room}:players`, client.data.username);
 
+    }
 
 
     @SubscribeMessage('create-room')
     async createRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any){
             const roomId = uuidv4()
             await client.join(roomId)
-            await this.redisClient.sadd(`${roomId}:players` , data.username );
+            client.data.room  = roomId
+            await this.redisClient.sadd(`${roomId}:players` , client.data.username);
             const roomData = {
-                'room_admin' : data.username,
+                'room_admin' : client.data.username,
             }
             await this.redisClient.hset(`room:${roomId}`, roomData);
             this.server.to(roomId).emit("new-room" ,roomId )
@@ -54,10 +62,14 @@ export class RoomGateWay implements OnModuleInit{
 
     @SubscribeMessage('join-room')
     async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
-            if(await this.redisClient.hgetall(`room:${data.room}`)){
+            if(client.data.room){
+                throw new WsException("You are already in an active room")
+            }
+            if(Object.keys(await this.redisClient.hgetall(`room:${data.room}`)).length>0){
                 await client.join(data.room)
-                await this.redisClient.sadd(`${data.room}:players` , data.username )
-                this.server.to(data.room).emit("joining" , `${data.username} joined the room`)
+                client.data.room = data.room
+                await this.redisClient.sadd(`${data.room}:players` , client.data.username )
+                this.server.to(data.room).emit("joining" , `${client.data.username} joined the room`)
             }
             else {
                 throw new  WsException('this room doesnt exist')
@@ -72,24 +84,32 @@ export class RoomGateWay implements OnModuleInit{
         for (const room of Array.from(client.rooms)) {
             if (room !== client.id) {
                 await client.leave(room);
+                client.data.room=null
                 curRoom = room;
             }
         }
         if(curRoom){
 
-            this.server.to(curRoom).emit("leaving" , `${data.username} left the room`)
+            this.server.to(curRoom).emit("leaving" , `${client.data.username} left the room`)
 
         }
     }
 
     @SubscribeMessage('start-game')
-    async startGame(@ConnectedSocket() client: Socket) {
+    async startGame(@ConnectedSocket() client: Socket , @MessageBody() data : any) {
 
-        const curRoom = getRoom(client)
+        const curRoom = client.data.room
+
+        if(!curRoom){
+            throw new WsException('You arent in a room' )
+        }
+
+        if(!(await this.redisClient.hget(`room:${curRoom}` , 'room_admin')===client.data.username) ){
+            throw  new WsException('You arent the admin of this room')
+        }
 
 
         if (curRoom) {
-
             const questions: Question[] = await this.questionsService.generateRoomQuestion();
             console.log(questions[0].answer)
             if (questions.length === 0) return; // Prevent errors if no questions
@@ -120,9 +140,10 @@ export class RoomGateWay implements OnModuleInit{
                 if (!leaderboardShown && (questionTimer === 0 || await this.didEveryoneSubmit(curRoom))) {
                     const new_scores = await this.updateScores(curRoom);
                     this.server.to(curRoom).emit("leaderboard", new_scores);
-                    this.redisClient.del('room1:answers');
+                    this.redisClient.del(`${client.data.room}:answers`);
                     leaderboardShown = true;
                 }
+
 
                 if (questionTimer > 0) {
                     this.server.to(curRoom).emit("timer", questionTimer);
@@ -134,6 +155,7 @@ export class RoomGateWay implements OnModuleInit{
 
                     if (currentQuestionIndex >= questions.length) {
                         clearInterval(interval);
+                        this.redisClient.flushall()
                         isProcessing = false;  // Reset flag when game loop is stopped
                         return;
                     }
@@ -153,20 +175,14 @@ export class RoomGateWay implements OnModuleInit{
             interval = setInterval(gameLoop, 1000);
 
         }
-
-        else {
-            throw new WsException('You arent in a room' )
-        }
-
-
     }
 
 
     @SubscribeMessage('submit-answer')
     async submitAnswer(@MessageBody() user : any , @ConnectedSocket() client  : Socket){
-        const curRoom = getRoom(client)
+        const curRoom = client.data.room
         if(curRoom && await this.redisClient.hget(`room:${curRoom}` , 'isActive' )){
-                await this.redisClient.hset(`${curRoom}:answers` ,`${user.username}`, user.answer)
+                await this.redisClient.hset(`${curRoom}:answers` ,`${client.data.username}`, user.answer)
 
         }
 
@@ -177,11 +193,13 @@ export class RoomGateWay implements OnModuleInit{
     }
 
 
+
+
     async didEveryoneSubmit (curRoom : string) : Promise<boolean>{
-        const answers = await this.redisClient.hgetall('room1:answers')
+        const answers = await this.redisClient.hgetall(`${curRoom}:answers`)
         const submittedArray = Object.keys(answers)
         const roomPlayers = await  this.redisClient.smembers(`${curRoom}:players`)
-        return submittedArray.length == roomPlayers.length
+        return submittedArray.length === roomPlayers.length
 
     }
 
@@ -208,10 +226,6 @@ export class RoomGateWay implements OnModuleInit{
 
 
 
-    @SubscribeMessage('trigger')
-    triggerErr(){
-        throw new WsException('Invalid credentials.');
-            }
 
 
 
