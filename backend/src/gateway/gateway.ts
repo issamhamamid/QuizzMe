@@ -63,9 +63,11 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
     @SubscribeMessage('join-room')
     async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
             if(client.data.room){
-                throw new WsException("You are already in an active room")
+                throw new WsException("You are already in a room")
             }
+
             if(Object.keys(await this.redisClient.hgetall(`room:${data.room}`)).length>0){
+
                 await client.join(data.room)
                 client.data.room = data.room
                 await this.redisClient.sadd(`${data.room}:players` , client.data.username )
@@ -79,18 +81,11 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
     @SubscribeMessage('leave-room')
     async leaveRoom(@ConnectedSocket() client : Socket , @MessageBody() data :any){
-        let curRoom: string = "";
 
-        for (const room of Array.from(client.rooms)) {
-            if (room !== client.id) {
-                await client.leave(room);
-                client.data.room=null
-                curRoom = room;
-            }
-        }
-        if(curRoom){
+        if(client.data.room){
 
-            this.server.to(curRoom).emit("leaving" , `${client.data.username} left the room`)
+            this.server.to(client.data.room).emit("leaving" , `${client.data.username} left the room`)
+            await this.redisClient.srem(`${client.data.room}:players`, client.data.username);
 
         }
     }
@@ -140,7 +135,7 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
                 if (!leaderboardShown && (questionTimer === 0 || await this.didEveryoneSubmit(curRoom))) {
                     const new_scores = await this.updateScores(curRoom);
                     this.server.to(curRoom).emit("leaderboard", new_scores);
-                    this.redisClient.del(`${client.data.room}:answers`);
+                    await this.redisClient.del(`${client.data.room}:answers`);
                     leaderboardShown = true;
                 }
 
@@ -155,7 +150,11 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
                     if (currentQuestionIndex >= questions.length) {
                         clearInterval(interval);
-                        this.redisClient.flushall()
+                        await this.redisClient.del(`room:${client.data.room}`)
+                        await this.redisClient.del(`${client.data.room}:players`);
+                        await this.redisClient.del(`${client.data.room}:scores`);
+                        await this.redisClient.del(`${client.data.room}:answers`);
+
                         isProcessing = false;  // Reset flag when game loop is stopped
                         return;
                     }
