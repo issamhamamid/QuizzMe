@@ -19,7 +19,9 @@ export class Question{
     @Column()
     media_url: string
 
-    @OneToMany(() => Proposition, (proposition) => proposition.question)
+    @OneToMany(() => Proposition, (proposition) => proposition.question , {
+        cascade : true
+    })
     propositions: Proposition[]
 
 

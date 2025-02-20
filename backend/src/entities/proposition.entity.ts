@@ -10,6 +10,8 @@ export class Proposition {
     @Column()
     content:string
 
-    @ManyToOne(()=>Question , (question)=>question.propositions)
+    @ManyToOne(()=>Question , (question)=>question.propositions , {
+        onDelete : 'CASCADE' ,
+    })
     question : Question
 }

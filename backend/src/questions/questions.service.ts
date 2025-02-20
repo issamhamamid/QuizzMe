@@ -2,6 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {Question} from "../entities/question.entity";
 import {Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
+import {CreateQuestionDto} from "../dtos/createQuestionDto.dto";
 
 @Injectable()
 export class QuestionsService {
@@ -27,6 +28,14 @@ export class QuestionsService {
      verifyAnswer(userAnswer : string , question : Question) : boolean {
         return userAnswer === question.answer
     }
+
+    async createQuestion(createQuestionDto : CreateQuestionDto) : Promise<Question> {
+        const newQuestion = this.questionsRepo.create(createQuestionDto)
+        return this.questionsRepo.save(newQuestion)
+
+    }
+
+
 
 
 }

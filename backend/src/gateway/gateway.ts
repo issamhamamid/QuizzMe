@@ -23,9 +23,6 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
     private QUESTION_TIME =15;
 
 
-
-
-
     constructor( private socketsMiddleware : WebSocketConnectionMiddleware , @Inject('REDIS_CLIENT') private readonly redisClient: Redis ,  private questionsService : QuestionsService ) {
 
     }
@@ -47,8 +44,8 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
 
     @SubscribeMessage('create-room')
-    async createRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any){
-            const roomId = uuidv4()
+    async createRoom(@ConnectedSocket() client  : Socket){
+            const roomId = uuidv4().replace(/-/g, '').slice(-8);
             await client.join(roomId)
             client.data.room  = roomId
             await this.redisClient.sadd(`${roomId}:players` , client.data.username);
@@ -60,12 +57,12 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
     }
 
     @SubscribeMessage('join-room')
-    async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() data : any ){
+    async joinRoom(@ConnectedSocket() client  : Socket , @MessageBody() room : string ){
             if(client.data.room){
                 throw new WsException("You are already in a room")
             }
 
-            const roomData = await this.redisClient.hgetall(`room:${data.room}`)
+            const roomData = await this.redisClient.hgetall(`room:${room}`)
 
 
             if(!(Object.keys(roomData).length>0)){
@@ -80,16 +77,16 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
 
 
-            await client.join(data.room)
-            client.data.room = data.room
-            await this.redisClient.sadd(`${data.room}:players` , client.data.username )
-            this.server.to(data.room).emit("joining" , `${client.data.username} joined the room`)
+            await client.join(room)
+            client.data.room = room
+            await this.redisClient.sadd(`${room}:players` , client.data.username )
+            this.server.to(room).emit("joining" , `${client.data.username} joined the room`)
 
 
     }
 
     @SubscribeMessage('leave-room')
-    async leaveRoom(@ConnectedSocket() client : Socket , @MessageBody() data :any){
+    async leaveRoom(@ConnectedSocket() client : Socket){
 
         if(client.data.room){
 
@@ -100,7 +97,7 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
     }
 
     @SubscribeMessage('start-game')
-    async startGame(@ConnectedSocket() client: Socket , @MessageBody() data : any) {
+    async startGame(@ConnectedSocket() client: Socket) {
 
         const curRoom = client.data.room
 
@@ -197,10 +194,10 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
 
 
     @SubscribeMessage('submit-answer')
-    async submitAnswer(@MessageBody() user : any , @ConnectedSocket() client  : Socket){
+    async submitAnswer(@MessageBody() answer : string , @ConnectedSocket() client  : Socket){
         const curRoom = client.data.room
         if(curRoom && await this.redisClient.hget(`room:${curRoom}` , 'isActive' )){
-                await this.redisClient.hset(`${curRoom}:answers` ,`${client.data.username}`, user.answer)
+                await this.redisClient.hset(`${curRoom}:answers` ,`${client.data.username}`, answer)
 
         }
 
@@ -229,7 +226,6 @@ export class RoomGateWay implements OnGatewayInit , OnGatewayDisconnect{
     }
 
     async updateScores (curRoom : string) {
-
         const usersAnswers = await this.redisClient.hgetall(`${curRoom}:answers`)
         const current_question  = await this.redisClient.hget(`room:${curRoom}` , 'current_question')
         const parsedQuestion : Question  = current_question ? JSON.parse(current_question) : null;
