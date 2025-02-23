@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-main-white: #e8f0fe;
+  --color-link-hover : #c4c2d7
+}
+
+body{
+  margin: 0;
+  font-family: "Anek Devanagari", serif;
+}
+
+
+*{
+  box-sizing: border-box;
+}
+
