@@ -1,4 +1,7 @@
-export const Login = () => {
+
+import {FC} from "react";
+
+export const Login : FC = () => {
 
     return (
 
@@ -15,8 +18,8 @@ export const Login = () => {
             >
 
                 <div className=' shadow-xl p-8 justify-items-center w-96  bg-[#5b4fcc] mx-auto rounded-xl flex-col '>
-                    <img alt='quizzme-logo' className='w-5/6 mb-6'
-                         src="https://ik.imagekit.io/trivia/logo.png?updatedAt=1682319452455"/>
+                    <img alt='quizzme-logo' className='w-5/6 mb-3'
+                         src="/src/assets/logo.png"/>
                     <form className='w-full text-[.915rem] mb-4  '>
                         <div>
                             <label className="block font-semibold  ">Username</label>
@@ -36,7 +39,7 @@ export const Login = () => {
                         </div>
                         <div className='flex justify-between font-light mb-6'>
                             <a>Remember me</a>
-                            <a className='cursor-pointer hover:text-link-hover '>Forgot your password?</a>
+                            <a className='cursor-pointer '>Forgot your password?</a>
                         </div>
                         <button
                             className=' pt-2 pb-1 cursor-pointer text-[1.3rem] font-semibold w-full bg-[#786fd5] rounded-lg  '
