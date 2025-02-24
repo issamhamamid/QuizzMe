@@ -16,7 +16,7 @@ export const SideBar = () => {
     }
     return (
         <>
-            <header className={clsx('lg:hidden bg-pink-bg p-3 flex flex-col  items-start text-main-white gap-6' , {'h-screen': isMenuOpen})}>
+            <header className={clsx('lg:hidden bg-pink-bg p-3 flex flex-col  items-start text-main-white gap-6 fixed top-0 w-full' , {'h-screen': isMenuOpen})}>
                 <div className='flex  justify-between w-full'>
                    <p className='text-[1.3rem] font-semibold pl-3'>Quizz Me</p>
                     <div className='text-[1.7rem] cursor-pointer' onClick={changeMenuVisibility}>

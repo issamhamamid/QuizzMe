@@ -3,7 +3,9 @@ import './App.css'
 import {BrowserRouter ,Routes ,  Route} from "react-router";
 import {Login} from "./components/Login.tsx";
 import {Register} from "./components/Register.tsx";
-import {SideBar} from "./components/SideBar.tsx";
+import {Home} from "./components/Home.tsx";
+import {MainLayout} from "./layouts/MainLayout.tsx";
+import {Room} from "./components/Room.tsx";
 
 function App() {
 
@@ -11,8 +13,12 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login/>} />
+                <Route path='/room' element={<Room/>}/>
                 <Route path='/register' element={<Register/>}></Route>
-                <Route path = '/sidebar' element={<SideBar/>}></Route>
+                <Route path='/app' element={<MainLayout/>}>
+                    <Route path='home' element={<Home/>}/>
+
+                </Route>
             </Routes>
         </BrowserRouter>
     )
