@@ -50,7 +50,7 @@ export const Register = () => {
 
                 <div className='flex gap-3 font-light text-[.915rem] '>
                     <p>Already have an account?</p>
-                    <a className=' block cursor-pointer underline hover:text-link-hover'>Sign up for free</a>
+                    <a className=' block cursor-pointer underline hover:text-link-hover'>Sign in </a>
                 </div>
 
             </div>
