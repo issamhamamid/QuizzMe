@@ -8,12 +8,15 @@ import {MainLayout} from "./layouts/MainLayout.tsx";
 import {Room} from "./components/Room.tsx";
 import {Question} from "./components/Question.tsx";
 
+import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
+
 function App() {
 
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login/>} />
+                <Route path="/leaderboard" element={<LeaderboardItem/>} />
                 <Route path='/room' element={<Room/>}/>
                 <Route path='/question' element={<Question/>}/>
                 <Route path='/register' element={<Register/>}></Route>
