@@ -1,14 +1,34 @@
+
+import { HiUsers } from "react-icons/hi";
+
+
 export const Question = () => {
     return (
         <div className='px-3'>
 
-            <div className=' bg-red-500 w-6/10 lg:w-5/10 xl:w-6/11 2xl:w-4/10  rounded-2xl mt-10  mx-auto z-20 relative     '>
-                <img className=' object-contain  w-full rounded-2xl' alt='media'
-                     src='https://trivianerd.s3.amazonaws.com/8804/159567.gif%26ct%3Dg'/>
+            <div className='flex items-center mx-auto  w-full 2xl:w-7/10  justify-evenly '>
+                <div className=' h-15 w-15 text-[1rem] bg-[#3e8a95] md:h-30  flex items-center justify-center md:w-30 text-center rounded-full opacity-75 md:text-5xl mt-10   text-white'>
+                    55
+                </div>
+                <div
+                    className='bg-sidebar-hover-bg h-45 md:h-80 xl:h-96 w-90  md:w-150  xl:w-180 rounded-2xl mt-10  z-20 relative shadow-black/50 shadow-2xl overflow-hidden flex items-center justify-center'>
+                    <img
+                        className=' h-full object-contain'
+                        alt='media'
+                        src='https://trivianerd.s3.amazonaws.com/8857/159625.gif%26ct%3Dg'
+                    />
+                </div>
+
+                <div
+                    className=' h-15 w-15  md:h-30   flex items-center justify-center md:w-30 text-center  opacity-75  mt-10 gap-1   text-black'>
+
+                    <p className='text-[1.1rem] md:text-[3.5rem]'>0</p>
+                     <HiUsers className=' text-[1.1rem] md:text-[3.5rem]'/>
+                </div>
             </div>
 
             <div
-                className='px-8 py-14 bg-pink-bg w-full -mt-7 mx-auto flex flex-col justify-center items-center rounded-2xl 2xl:w-7/10 relative  '>
+                className='px-8 py-14 bg-pink-bg   mx-auto flex flex-col justify-center items-center rounded-2xl w-full 2xl:w-7/10 relative -mt-7  '>
                 <h1 className='text-3xl text-white font-bold mb-10  text-center'>In which Hawaiian city was Barack Obama
                     born?</h1>
 
@@ -33,7 +53,7 @@ export const Question = () => {
 
                     <button className=' cursor-pointer bg-gray-200 pb-2 rounded-2xl'>
                         <div className='py-5 bg-green-300 rounded-2xl border-3 border-white shadow-2xl '>
-                            <p className='text-center text-green-900 text-2xl '>Tremto Djamel</p>
+                            <p className='text-center text-green-900 text-2xl '>DDY</p>
                         </div>
                     </button>
                 </div>
