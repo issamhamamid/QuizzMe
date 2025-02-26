@@ -6,6 +6,7 @@ import {Register} from "./components/Register.tsx";
 import {Home} from "./components/Home.tsx";
 import {MainLayout} from "./layouts/MainLayout.tsx";
 import {Room} from "./components/Room.tsx";
+import {Question} from "./components/Question.tsx";
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Login/>} />
                 <Route path='/room' element={<Room/>}/>
+                <Route path='/question' element={<Question/>}/>
                 <Route path='/register' element={<Register/>}></Route>
                 <Route path='/app' element={<MainLayout/>}>
                     <Route path='home' element={<Home/>}/>
