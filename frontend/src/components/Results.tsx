@@ -60,6 +60,20 @@ export const Results = () => {
                  </div>
              </div>
 
+             <div className=' w-full md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold '>
+                   <div className='flex justify-evenly bg-sidebar-hover-bg w-full  py-3 rounded-t-3xl' >
+                        <p className='w-1/3 text-center'>Rank</p>
+                        <p className='w-1/3 text-center'>Player</p>
+                        <p className='w-1/3 text-center'>Score</p>
+                   </div>
+                 <div className='flex bg-[#5b4fcc]  py-3 justify-between rounded-b-2xl w-full '>
+                     <p className='w-1/3 text-center'>1</p>
+                     <p className='w-1/3 text-center'>Idfd</p>
+                     <p className='w-1/3 text-center'>600</p>
+                 </div>
+
+             </div>
+
          </div>
         </>
     );
