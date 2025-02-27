@@ -9,6 +9,7 @@ import {Room} from "./components/Room.tsx";
 import {Question} from "./components/Question.tsx";
 
 import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
+import {Results} from "./components/Results.tsx";
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/" element={<Login/>} />
                 <Route path="/leaderboard" element={<LeaderboardItem/>} />
                 <Route path='/room' element={<Room/>}/>
+                <Route path='/results' element={<Results/>}/>
                 <Route path='/question' element={<Question/>}/>
                 <Route path='/register' element={<Register/>}></Route>
                 <Route path='/app' element={<MainLayout/>}>
