@@ -3,6 +3,7 @@ import {useUser} from "../customHooks/useUser.js";
 import axios from "axios";
 import {useEffect, useState} from "react";
 import {Loading} from "../components/Loading.jsx";
+import {RoomProvider} from "../context providers/RoomProvider.tsx";
 
 const PrivateRouteLayout = () => {
 
@@ -29,9 +30,9 @@ const PrivateRouteLayout = () => {
 
 
     return (
-        <>
+        <RoomProvider>
             {isLoadig ? <Loading/> : isValid ? <Outlet/> : <Navigate to='/'/>}
-        </>
+        </RoomProvider>
     )
 }
 

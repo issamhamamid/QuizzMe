@@ -16,7 +16,7 @@ export const Login : FC = () => {
         }
 
         try{
-            const response = await axios.post('http://localhost:3000/auth/login' , data)
+            const response = await axios.post<{token : string}>('http://localhost:3000/auth/login' , data)
             if(response.status === 200 || 201){
                 navigate('app/home')
                 setJwt(response.data.token)

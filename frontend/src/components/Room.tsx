@@ -1,12 +1,18 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import { useState} from "react";
+import {useContext, useState} from "react";
+import {RoomContext} from "../context providers/RoomProvider.tsx";
+import {Navigate} from "react-router";
 
 
 
 export const Room = () => {
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
     const [isPlayers , setIsPlayers] = useState(false)
+    const { roomUsername } = useContext(RoomContext) ?? {};
 
+    if(!roomUsername){
+        return(<Navigate to='/app/home'/>)
+    }
 
     return (
         <div className='flex flex-col'>

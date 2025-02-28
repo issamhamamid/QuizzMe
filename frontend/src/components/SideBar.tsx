@@ -7,12 +7,20 @@ import { IoMdMenu } from "react-icons/io";
 import {useState} from "react";
 import { IoClose } from "react-icons/io5";
 import clsx from "clsx";
+import {useNavigate} from "react-router";
+import {useUser} from "../customHooks/useUser.ts";
 
 
 export const SideBar = () => {
     const [isMenuOpen , setIsMenuOpen] = useState<boolean>(false)
     const changeMenuVisibility = ()=>{
         setIsMenuOpen(!isMenuOpen)
+    }
+    const {setJwt} = useUser()
+    const navigate  = useNavigate()
+    const logout = () : void=>{
+        setJwt(null)
+        navigate('/')
     }
     return (
         <>
@@ -79,11 +87,11 @@ export const SideBar = () => {
                     <p className=' leading-none mt-0.5'>Profile</p>
                 </Link>
 
-                <Link to='/'
+                <div onClick={logout}
                       className='flex w-full p-3  rounded-sm  gap-3  items-center cursor-pointer hover:bg-sidebar-hover-bg hover:text-white '>
                     <TbLogout className='text-[1.3rem]    '/>
                     <p className=' leading-none mt-0.5'>Logout</p>
-                </Link>
+                </div>
 
             </aside>
 

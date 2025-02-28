@@ -10,7 +10,7 @@ import {Question} from "./components/Question.tsx";
 
 import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
 import {Results} from "./components/Results.tsx";
-import {UserProvider} from "./components/UserProvider.tsx";
+import {UserProvider} from "./context providers/UserProvider.tsx";
 import PrivateRouteLayout from "./layouts/PrivateRouteLayout.tsx";
 
 function App() {
@@ -26,12 +26,15 @@ function App() {
                     <Route path='/question' element={<Question/>}/>
                     <Route path='/register' element={<Register/>}></Route>
 
-                    <Route element={<PrivateRouteLayout />} >
-                        <Route path='/app' element={<MainLayout/>}>
-                            <Route path='home' element={<Home/>}/>
+
+                        <Route element={<PrivateRouteLayout />} >
+                            <Route path='/app' element={<MainLayout/>}>
+                                <Route path='home' element={<Home/>}/>
+
+                            </Route>
                             <Route path='room' element={<Room/>}/>
                         </Route>
-                    </Route>
+
 
 
                 </Routes>

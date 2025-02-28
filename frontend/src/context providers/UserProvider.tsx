@@ -1,5 +1,5 @@
 import {createContext,  ReactNode, FC} from "react";
-import { useLocalState } from "../customHooks/useLocalState";
+import { useLocalState } from "../customHooks/useLocalState.ts";
 
 // Define the shape of the context
 type UserContextType = {

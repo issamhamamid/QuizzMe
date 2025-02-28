@@ -1,5 +1,5 @@
 import {useContext} from "react";
-import {UserContext} from "../components/UserProvider.jsx";
+import {UserContext} from "../context providers/UserProvider.tsx";
 
 function useUser() {
     const context = useContext(UserContext);
