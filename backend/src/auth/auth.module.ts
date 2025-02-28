@@ -1,26 +1,35 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import {UserModule} from "../user/user.module";
-import {PassportModule} from "@nestjs/passport";
-import {JwtModule} from "@nestjs/jwt";
-import {LocalStrategy} from "./local.strategy";
-import {JwtStrategy} from "./jwt.strategy";
-import {JwtAuthGuard} from "../guards/jwt-guard";
-import {APP_GUARD} from "@nestjs/core";
+import { UserModule } from '../user/user.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './jwt.strategy';
+import { JwtAuthGuard } from '../guards/jwt-guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  providers: [AuthService , LocalStrategy , JwtStrategy ,  {
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard,
-  },],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
   controllers: [AuthController],
-  imports: [UserModule , PassportModule , JwtModule.registerAsync({
-    useFactory: async () => ({
-      secret: process.env.SECRET,  // This will always get the latest value
-      signOptions: { expiresIn: '1h' },
+  imports: [
+    UserModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.SECRET, // This will always get the latest value
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
-  }), ],
-  exports : [AuthService]
+  ],
+  exports: [AuthService],
 })
 export class AuthModule {}

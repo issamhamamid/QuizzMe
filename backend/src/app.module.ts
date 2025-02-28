@@ -10,26 +10,21 @@ import { QuestionsModule } from './questions/questions.module';
 import {GatewayModule} from "./gateway/gateway.module";
 import { RedisModule } from './redis/redis.module';
 
-
-
-
-
-
 @Module({
-  imports: [UserModule , GatewayModule ,
+  imports: [
+    UserModule,
+    GatewayModule,
     TypeOrmModule.forRootAsync({
-      useFactory : ()=>({
-
+      useFactory: () => ({
         type: 'mysql',
         host: 'localhost',
-        port: parseInt(process.env.DB_PORT || '3000') ,
-        username: process.env.DB_USERNAME  ,
-        password: process.env.DB_PASSWORD ,
-        database: process.env.DB_NAME ,
-        autoLoadEntities : true,
-        synchronize: true,
-
-      })
+        port: parseInt(process.env.DB_PORT || '3000'),
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        autoLoadEntities: true,
+        migrations: ['src/migrations/*.ts'],
+      }),
     }),
     AuthModule,
 
@@ -41,7 +36,6 @@ import { RedisModule } from './redis/redis.module';
     QuestionsModule,
 
     RedisModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],
