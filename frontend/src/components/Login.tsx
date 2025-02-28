@@ -1,7 +1,38 @@
 
-import {FC} from "react";
+import {FC, useActionState} from "react";
+import axios from "axios";
+
+import {useNavigate} from "react-router";
+import {useUser} from "../customHooks/useUser.ts";
 
 export const Login : FC = () => {
+
+    const navigate = useNavigate()
+    const {setJwt} = useUser()
+    const submit =async  (prev : any , formData : any)=>{
+        const data : {username : string , password: string , error? : any} = {
+            username : formData.get('username'),
+            password : formData.get('password')
+        }
+
+        try{
+            const response = await axios.post('http://localhost:3000/auth/login' , data)
+            if(response.status === 200 || 201){
+                navigate('app/home')
+                setJwt(response.data.token)
+
+            }
+        }
+        catch (err : any){
+            data.error = err.response.data
+
+        }
+
+        return data
+    }
+
+
+    const [data  ,submitAction , isPending] = useActionState(submit ,  null);
 
     return (
 
@@ -20,16 +51,20 @@ export const Login : FC = () => {
                 <div className=' shadow-xl p-8 justify-items-center w-96  bg-[#5b4fcc] mx-auto rounded-xl flex-col '>
                     <img alt='quizzme-logo' className='w-5/6 mb-3'
                          src="/src/assets/logo.png"/>
-                    <form className='w-full text-[.915rem] mb-4  '>
+                    {data?.error?.statusCode === 401 &&
+                        <p className='text-red-700 justify-self-start text-[.95rem] mb-3 '>Invalid username or
+                            password</p>}
+
+                    <form action={submitAction} className='w-full text-[.915rem] mb-4  '>
                         <div>
                             <label className="block font-semibold  ">Username</label>
-                            <input type="text" className="text-black font-medium bg-white w-full p-3 pb-1.5 rounded-lg outline-none "
+                            <input defaultValue={data?.username}  type="text" id='username' name = 'username'  className="text-black font-medium bg-white w-full p-3 pb-1.5 rounded-lg outline-none "
 
                                    placeholder="Username" required/>
                         </div>
                         <div className="mt-4 mb-4 ">
                             <label className="block font-semibold">Password</label>
-                            <input type="password"
+                            <input defaultValue={data?.password} type="password" id='password' name = 'password'
                                    className="  p-3 pb-1.5  text-black bg-white w-full font-medium rounded-lg  outline-none"
 
                                    placeholder="Password" required/>

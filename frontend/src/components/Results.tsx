@@ -60,7 +60,7 @@ export const Results = () => {
                  </div>
              </div>
 
-             <div className=' w-full md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold '>
+             <div className=' w-9/10 md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold '>
                    <div className='flex justify-evenly bg-sidebar-hover-bg w-full  py-3 rounded-t-3xl' >
                         <p className='w-1/3 text-center'>Rank</p>
                         <p className='w-1/3 text-center'>Player</p>

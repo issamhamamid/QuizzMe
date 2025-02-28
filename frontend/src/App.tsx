@@ -10,24 +10,33 @@ import {Question} from "./components/Question.tsx";
 
 import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
 import {Results} from "./components/Results.tsx";
+import {UserProvider} from "./components/UserProvider.tsx";
+import PrivateRouteLayout from "./layouts/PrivateRouteLayout.tsx";
 
 function App() {
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Login/>} />
-                <Route path="/leaderboard" element={<LeaderboardItem/>} />
-                <Route path='/room' element={<Room/>}/>
-                <Route path='/results' element={<Results/>}/>
-                <Route path='/question' element={<Question/>}/>
-                <Route path='/register' element={<Register/>}></Route>
-                <Route path='/app' element={<MainLayout/>}>
-                    <Route path='home' element={<Home/>}/>
+        <UserProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Login/>} />
+                    <Route path="/leaderboard" element={<LeaderboardItem/>} />
 
-                </Route>
-            </Routes>
-        </BrowserRouter>
+                    <Route path='/results' element={<Results/>}/>
+                    <Route path='/question' element={<Question/>}/>
+                    <Route path='/register' element={<Register/>}></Route>
+
+                    <Route element={<PrivateRouteLayout />} >
+                        <Route path='/app' element={<MainLayout/>}>
+                            <Route path='home' element={<Home/>}/>
+                            <Route path='room' element={<Room/>}/>
+                        </Route>
+                    </Route>
+
+
+                </Routes>
+            </BrowserRouter>
+        </UserProvider>
     )
 }
 
