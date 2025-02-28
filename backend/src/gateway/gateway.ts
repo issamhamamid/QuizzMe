@@ -43,7 +43,6 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
     );
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('create-room')
   async createRoom(@ConnectedSocket() client: CustomSocket) {
     const roomId = uuidv4().replace(/-/g, '').slice(-8);
