@@ -1,18 +1,51 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
-import {Navigate} from "react-router";
+import {Navigate, useParams} from "react-router";
+import {socketConfig} from "../util/socket.ts";
+import {useUser} from "../customHooks/useUser.ts";
 
 
 
-export const Room = () => {
+
+
+export const AdminRoom = () => {
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
     const [isPlayers , setIsPlayers] = useState(false)
-    const { roomUsername } = useContext(RoomContext) ?? {};
+    const { roomUsername , connectedPlayers , setConnectedPlayers } = useContext(RoomContext) ?? {};
+
+    const {jwt} = useUser()
+    const {id} = useParams()
+
 
     if(!roomUsername){
         return(<Navigate to='/app/home'/>)
     }
+
+    const socket = socketConfig(roomUsername, jwt? jwt : '');
+
+    useEffect(() => {
+        socket.connect();
+        socket.emit('create-room' , {roomId : id })
+        socket.on('connected-players' , (players)=>{
+            if(setConnectedPlayers){
+                setConnectedPlayers(players)
+            }
+        })
+
+
+
+
+
+        return () => {
+
+
+            socket.disconnect();
+        };
+
+    }, []);
+
+
 
     return (
         <div className='flex flex-col'>
@@ -35,7 +68,7 @@ export const Room = () => {
                         <div>
                             <p className='text-3xl lg:text-5xl'>
                                 Go to <strong className='text-white'>quizzme.live</strong> <br/> and enter
-                                <strong className='text-white'> X7B-58Y</strong>
+                                <strong className='text-white'> {id?.toUpperCase()}</strong>
                             </p>
                             <button
                                 className=' cursor-pointer rounded-2xl text-white text-[.8rem] font-normal bg-[#3f33b0] py-1 px-2'>
@@ -62,21 +95,36 @@ export const Room = () => {
 
                 </div>
 
-                {isPlayers ? <div className='flex flex-col items-center text-white '>
-                        <div className='flex justify-between w-9/10 sm:w-122 items-center mb-5'>
-                            <p className='text-xl'>1 player</p>
-                            <button
-                                className=' font-extrabold hover:bg-[#22C55E] focus:bg-[#22C55E] cursor-pointer tracking-widest  rounded-sm py-4 px-12 bg-[#4ade80] text-[#14532d] '>START
-                                GAME
-                            </button>
+                { connectedPlayers && connectedPlayers.length > 0 ?
+
+                    <div>
+                        <div className='flex flex-col items-center text-white mb-4 '>
+                            <div className='flex justify-between w-9/10 sm:w-122 items-center mb-5'>
+                                <p className='text-xl'>{connectedPlayers.length} Players</p>
+                                <button
+                                    className=' font-extrabold hover:bg-[#22C55E] focus:bg-[#22C55E] cursor-pointer tracking-widest  rounded-sm py-4 px-12 bg-[#4ade80] text-[#14532d] '>START
+                                    GAME
+                                </button>
+
+                            </div>
+
+
+                            {connectedPlayers.map((player) => {
+                                return (
+                                    <div key={player}
+                                         className='bg-[#3f33b0]  w-9/10 sm:w-122 rounded-3xl flex items-center py-1 mb-3 px-5 gap-3 '>
+                                        <img src='https://avatars.saasmates.workers.dev/svg?isCircle=true'
+                                             alt='avatar'
+                                             className='h-[4em] mb-2'/>
+                                        <p>{player}</p>
+                                    </div>
+                                )
+                            })}
 
                         </div>
-                        <div className='bg-[#3f33b0]  w-9/10 sm:w-122 rounded-3xl flex items-center py-1 px-5 gap-3 '>
-                            <img src='https://avatars.saasmates.workers.dev/svg?isCircle=true' alt='avatar'
-                                 className='h-[4em] mb-2'/>
-                            <p>Issam Hammamid</p>
-                        </div>
-                    </div> :
+                    </div>
+
+                    :
                     <div className='flex justify-center items-center w-9/10 mx-auto mb-5  gap-8'>
                         <div className="w-6 h-6 rounded-full animate-ping bg-primary-100  bg-white"></div>
                         <p className='text-main-white text-4xl'>Waiting for players to join...</p>

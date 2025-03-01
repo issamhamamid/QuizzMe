@@ -8,6 +8,7 @@ import {RoomProvider} from "../context providers/RoomProvider.tsx";
 const PrivateRouteLayout = () => {
 
     const {jwt} = useUser()
+
     const [isValid, setIsValid] = useState<boolean | null>(null);
     const [isLoadig, setisLoadig] = useState<boolean>(true)
 

@@ -8,7 +8,7 @@ import {useUser} from "../customHooks/useUser.ts";
 export const Login : FC = () => {
 
     const navigate = useNavigate()
-    const {setJwt} = useUser()
+    const {setJwt , jwt} = useUser()
     const submit =async  (prev : any , formData : any)=>{
         const data : {username : string , password: string , error? : any} = {
             username : formData.get('username'),
@@ -18,8 +18,8 @@ export const Login : FC = () => {
         try{
             const response = await axios.post<{token : string}>('http://localhost:3000/auth/login' , data)
             if(response.status === 200 || 201){
-                navigate('app/home')
                 setJwt(response.data.token)
+                navigate('app/home')
 
             }
         }

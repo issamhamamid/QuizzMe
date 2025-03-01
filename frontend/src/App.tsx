@@ -5,13 +5,14 @@ import {Login} from "./components/Login.tsx";
 import {Register} from "./components/Register.tsx";
 import {Home} from "./components/Home.tsx";
 import {MainLayout} from "./layouts/MainLayout.tsx";
-import {Room} from "./components/Room.tsx";
+import {AdminRoom} from "./components/AdminRoom.tsx";
 import {Question} from "./components/Question.tsx";
 
 import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
 import {Results} from "./components/Results.tsx";
 import {UserProvider} from "./context providers/UserProvider.tsx";
 import PrivateRouteLayout from "./layouts/PrivateRouteLayout.tsx";
+import {UserRoom} from "./components/UserRoom.tsx";
 
 function App() {
 
@@ -32,7 +33,8 @@ function App() {
                                 <Route path='home' element={<Home/>}/>
 
                             </Route>
-                            <Route path='room' element={<Room/>}/>
+                            <Route path='room/admin/:id' element={<AdminRoom/>}/>
+                            <Route path='room/:id' element={<UserRoom/>}/>
                         </Route>
 
 

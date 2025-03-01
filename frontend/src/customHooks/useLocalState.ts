@@ -16,7 +16,7 @@ const  useLocalState = (key : string)=>{
 
 
 
-        if(firstRender.current >1){
+        if(firstRender.current >0){
             localStorage.setItem(key, JSON.stringify(value));
         }
 

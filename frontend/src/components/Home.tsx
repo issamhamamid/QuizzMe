@@ -4,6 +4,7 @@ import {JwtPayload} from "../types/types.ts";
 import {useContext, useRef} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
 import {useNavigate} from "react-router";
+import { v4 as uuidv4 } from 'uuid';
 
 export const Home = () => {
 
@@ -21,7 +22,9 @@ export const Home = () => {
     const createRoom = ()=>{
         if(usernameRef.current && setRoomUsername){
             setRoomUsername(usernameRef.current.value)
-            navigate('/room')
+            const roomId : string = uuidv4().replace(/-/g, '').slice(-8);
+            const roomUrl = `/room/admin/${roomId}`; // Introduced variable for room URL
+            navigate(roomUrl); // Use the extracted variable
         }
     }
     const { setRoomUsername } = useContext(RoomContext) ?? {};
