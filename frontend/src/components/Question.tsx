@@ -1,11 +1,19 @@
 
 import { HiUsers } from "react-icons/hi";
 import { FaCheck } from "react-icons/fa6";
-import {FC, useContext} from "react";
+import {FC, useContext, useState} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
+import clsx from "clsx";
 
 export const Question : FC = () => {
     const {timer , connectedPlayers} = useContext(RoomContext) ?? {}
+    const [padding, setPadding] = useState({
+        first : true ,
+        second : true ,
+        third : true ,
+        last : true
+    })
+    console.log(padding.second)
     return (
         <div className='px-5  '>
 
@@ -35,37 +43,78 @@ export const Question : FC = () => {
                 <h1 className='text-3xl text-white font-bold mb-10  text-center'>In which Hawaiian city was Barack Obama
                     born?</h1>
 
-                <div className=' flex flex-col w-full xl:w-9/10 xl:grid xl:grid-cols-2 gap-5 relative '>
+                <div className=' flex flex-col w-full xl:w-9/10 xl:grid xl:grid-cols-2 gap-3  relative '>
 
 
-                    <button className=' cursor-pointer bg-gray-200 pb-2 rounded-2xl relative'>
-                        <div className='bg-white h-11 w-11 rounded-full absolute -right-5 -top-3 flex items-center justify-center '>
-                            <FaCheck className='text-[1.5rem] text-black '/>
+                    <div  className={clsx('h-22 flex flex-col  mb-2' , !padding.first && 'justify-end')}>
+                        <button onMouseDown={()=>{setPadding({...padding , first: !padding.first})}} onMouseUp={() => {
+                            setPadding({...padding , first: !padding.first})
+                        }} onMouseLeave={() => {
+                            setPadding({...padding , first: true})
+                        }}
+                                className={clsx('cursor-pointer w-full bg-gray-200 rounded-2xl relative', padding.first ? 'pb-2' : 'pb-1')}>
 
-                        </div>
-                        <div className='py-5 bg-[#FCA5A5] rounded-2xl border-3 border-white shadow-2xl '>
-                            <p className='text-center text-[#872525] text-2xl '>Makawao</p>
-                        </div>
-                    </button>
+                            <div className='py-5 bg-[#FCA5A5] rounded-2xl border-3 border-white shadow-2xl  '>
+                                <p className='text-center text-[#872525] text-2xl '>Makawao</p>
+                            </div>
 
-                    <button className='opacity-55 cursor-pointer bg-gray-200 pb-2 rounded-2xl'>
-                    <div className='py-5 bg-[#93C5FD] rounded-2xl border-3 border-white shadow-2xl '>
-                            <p className='text-center text-blue-900 text-2xl '>Lahaina</p>
-                        </div>
-                    </button>
 
-                    <button className=' opacity-55  cursor-pointer bg-gray-200 pb-2 rounded-2xl'>
+                            <div
+                                className='bg-white h-11 w-11 rounded-full absolute -right-5 -top-3 flex items-center justify-center '>
+                                <FaCheck className='text-[1.5rem] text-black '/>
+
+                            </div>
+
+                        </button>
+                    </div>
+
+                    <div className={clsx('h-22 flex flex-col  mb-2' , !padding.second && 'justify-end' )}>
+
+                        <button onMouseDown={()=>{setPadding({...padding , second: !padding.second})}} onMouseUp={() => {
+                            setPadding({...padding , second: !padding.second})
+                        }} onMouseLeave={() => {
+                            setPadding({...padding , second: true})
+                        }}
+
+                            className={clsx('opacity-55 cursor-pointer bg-gray-200  rounded-2xl' , padding.second ? 'pb-2' : 'pb-1' )}>
+                            <div className='py-5 bg-[#93C5FD] rounded-2xl border-3 border-white shadow-2xl '>
+                                <p className='text-center text-blue-900 text-2xl '>Lahaina</p>
+                            </div>
+                        </button>
+                    </div>
+
+
+                    <div className={clsx('h-22 flex flex-col  mb-2' , !padding.third && 'justify-end' ) }>
+
+                    <button
+                        onMouseDown={()=>{setPadding({...padding , third: !padding.third})}} onMouseUp={() => {
+                        setPadding({...padding , third: !padding.third})
+                    }} onMouseLeave={() => {
+                        setPadding({...padding , third: true})
+                    }}
+                        className={clsx(' opacity-55  cursor-pointer bg-gray-200  rounded-2xl' , padding.third ? 'pb-2' : 'pb-1')}>
                         <div className='py-5 bg-yellow-300 rounded-2xl border-3 border-white shadow-2xl '>
                             <p className='text-center text-[#872525] text-2xl '>Puhi</p>
                         </div>
                     </button>
+                    </div>
 
-                    <button className=' opacity-55 cursor-pointer bg-gray-200 pb-2 rounded-2xl relative'>
+
+                    <div className={clsx('h-22 flex flex-col  mb-2'  , !padding.last && 'justify-end')}>
+
+                    <button
+                        onMouseDown={()=>{setPadding({...padding , last: !padding.last})}} onMouseUp={() => {
+                        setPadding({...padding , last: !padding.last})
+                    }} onMouseLeave={() => {
+                        setPadding({...padding , last: true})
+                    }}
+                        className={clsx(' opacity-55 cursor-pointer bg-gray-200  rounded-2xl relative' , padding.last ? 'pb-2' : 'pb-1')}  >
 
                         <div className='py-5 bg-green-300 rounded-2xl border-3 border-white shadow-2xl '>
-                            <p className='text-center text-green-900 text-2xl '>DDY</p>
+                        <p className='text-center text-green-900 text-2xl '>DDY</p>
                         </div>
                     </button>
+                    </div>
                 </div>
 
             </div>

@@ -73,8 +73,12 @@ export const AdminRoom = () => {
                     Settings
 
                 </button>
-                {!didGameStart && <WaitingRoom startGame={startGame} id={id}/>}
-                {didGameStart && <Question/>}
+                {didGameStart ? <WaitingRoom startGame={startGame} id={id}/> :
+
+                     <Question/>
+                }
+
+
 
 
             </div>
