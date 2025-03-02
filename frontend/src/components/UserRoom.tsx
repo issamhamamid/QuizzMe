@@ -1,5 +1,5 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect} from "react";
 import { useParams} from "react-router";
 import {socketConfig} from "../util/socket.ts";
 import {useUser} from "../customHooks/useUser.ts";
@@ -10,7 +10,7 @@ import {RoomContext} from "../context providers/RoomProvider.tsx";
 
 export const UserRoom = () => {
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
-    const [isPlayers , setIsPlayers] = useState(true)
+
     const {jwt} = useUser()
     const {id} = useParams()
     const username = jwtDecode<JwtPayload>(jwt ? jwt : "").username

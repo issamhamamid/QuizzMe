@@ -1,49 +1,64 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useRef} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
 import {Navigate, useParams} from "react-router";
 import {socketConfig} from "../util/socket.ts";
 import {useUser} from "../customHooks/useUser.ts";
-
-
+import {Socket} from "socket.io-client";
 
 
 
 export const AdminRoom = () => {
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
-    const [isPlayers , setIsPlayers] = useState(false)
-    const { roomUsername , connectedPlayers , setConnectedPlayers } = useContext(RoomContext) ?? {};
+    const { roomUsername , connectedPlayers , setConnectedPlayers , timer , setTimer } = useContext(RoomContext) ?? {};
 
     const {jwt} = useUser()
     const {id} = useParams()
+    const socketRef = useRef<Socket | null>(null)
 
 
     if(!roomUsername){
         return(<Navigate to='/app/home'/>)
     }
 
-    const socket = socketConfig(roomUsername, jwt? jwt : '');
+
 
     useEffect(() => {
-        socket.connect();
-        socket.emit('create-room' , {roomId : id })
-        socket.on('connected-players' , (players)=>{
+        socketRef.current = socketConfig(roomUsername, jwt? jwt : '').connect();
+
+        socketRef.current.emit('create-room' , {roomId : id })
+        socketRef.current.on('connected-players' , (players)=>{
             if(setConnectedPlayers){
                 setConnectedPlayers(players)
             }
         })
 
+        socketRef.current.on('timer' , (timer)=>{
+            if(setTimer){
+                setTimer(timer)
+            }
+        })
 
-
-
+        socketRef.current.on('exception' , (ex)=>{
+            console.log(ex)
+        })
 
         return () => {
 
+            if(socketRef.current){
+             socketRef.current.disconnect();
 
-            socket.disconnect();
+            }
         };
 
     }, []);
+
+    const startGame = ()=>{
+        if(socketRef.current){
+            socketRef.current.emit('start-game')
+        }
+
+    }
 
 
 
@@ -101,7 +116,7 @@ export const AdminRoom = () => {
                         <div className='flex flex-col items-center text-white mb-4 '>
                             <div className='flex justify-between w-9/10 sm:w-122 items-center mb-5'>
                                 <p className='text-xl'>{connectedPlayers.length} Players</p>
-                                <button
+                                <button onClick={startGame}
                                     className=' font-extrabold hover:bg-[#22C55E] focus:bg-[#22C55E] cursor-pointer tracking-widest  rounded-sm py-4 px-12 bg-[#4ade80] text-[#14532d] '>START
                                     GAME
                                 </button>
@@ -130,13 +145,13 @@ export const AdminRoom = () => {
                         <p className='text-main-white text-4xl'>Waiting for players to join...</p>
                     </div>}
 
-                <div
-                    className='mt-auto bg-[#3F33B0] border-t-2 border-[#968EDE] w-full px-3 py-2  flex  text-white font-semibold'>
-                    <img src='https://avatars.saasmates.workers.dev/svg?isCircle=true' alt='avatar'
-                         className='h-[3em] mb-2 mr-4  '/>
-                    <div className='p-2 bg-[#786FD5] rounded-sm self-center mb-2 '>90 Points</div>
+                {/*<div*/}
+                {/*    className='mt-auto bg-[#3F33B0] border-t-2 border-[#968EDE] w-full px-3 py-2  flex  text-white font-semibold'>*/}
+                {/*    <img src='https://avatars.saasmates.workers.dev/svg?isCircle=true' alt='avatar'*/}
+                {/*         className='h-[3em] mb-2 mr-4  '/>*/}
+                {/*    <div className='p-2 bg-[#786FD5] rounded-sm self-center mb-2 '>90 Points</div>*/}
 
-                </div>
+                {/*</div>*/}
 
 
             </div>

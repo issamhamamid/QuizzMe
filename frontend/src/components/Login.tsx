@@ -8,7 +8,7 @@ import {useUser} from "../customHooks/useUser.ts";
 export const Login : FC = () => {
 
     const navigate = useNavigate()
-    const {setJwt , jwt} = useUser()
+    const {setJwt} = useUser()
     const submit =async  (prev : any , formData : any)=>{
         const data : {username : string , password: string , error? : any} = {
             username : formData.get('username'),
