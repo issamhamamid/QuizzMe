@@ -56,7 +56,7 @@ export const Question : FC<{socketRef : RefObject<Socket | null>}> = ({socketRef
 
 
                         <div className={clsx('h-22 flex flex-col  mb-2', !padding.first && 'justify-end')}>
-                            <button onMouseDown={() => {
+                            <button disabled={didEveryoneSubmit === null ? false : didEveryoneSubmit}  onMouseDown={() => {
                                 setPadding({...padding, first: !padding.first})
                             }} onMouseUp={() => {
                                 setPadding({...padding, first: !padding.first})
@@ -84,7 +84,7 @@ export const Question : FC<{socketRef : RefObject<Socket | null>}> = ({socketRef
 
                         <div className={clsx('h-22 flex flex-col  mb-2', !padding.second && 'justify-end')}>
 
-                            <button onMouseDown={() => {
+                            <button disabled={didEveryoneSubmit === null ? false : didEveryoneSubmit} onMouseDown={() => {
                                 setPadding({...padding, second: !padding.second})
                             }} onMouseUp={() => {
                                 setPadding({...padding, second: !padding.second})
@@ -114,7 +114,7 @@ export const Question : FC<{socketRef : RefObject<Socket | null>}> = ({socketRef
 
                         <div className={clsx('h-22 flex flex-col  mb-2', !padding.third && 'justify-end')}>
 
-                            <button
+                            <button disabled={didEveryoneSubmit === null ? false : didEveryoneSubmit}
                                 onMouseDown={() => {
                                     setPadding({...padding, third: !padding.third})
                                 }} onMouseUp={() => {
@@ -142,7 +142,7 @@ export const Question : FC<{socketRef : RefObject<Socket | null>}> = ({socketRef
 
                         <div className={clsx('h-22 flex flex-col  mb-2', !padding.last && 'justify-end')}>
 
-                            <button
+                            <button disabled={didEveryoneSubmit === null ? false : didEveryoneSubmit}
                                 onMouseDown={() => {
                                     setPadding({...padding, last: !padding.last})
                                 }} onMouseUp={() => {

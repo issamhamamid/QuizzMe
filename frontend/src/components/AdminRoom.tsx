@@ -7,12 +7,13 @@ import {useUser} from "../customHooks/useUser.ts";
 import {Socket} from "socket.io-client";
 import {WaitingRoom} from "./WaitingRoom.tsx";
 import {Question} from "./Question.tsx";
-import {LeaderboardItem} from "./LeaderboardItem.tsx";
+import {Leaderboard} from "./Leaderboard.tsx";
+import {Results} from "./Results.tsx";
 
 
 
 export const AdminRoom = () => {
-    const {  setCurrentQuestion , displayLeaderboard,    roomUsername ,  setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
+    const {  finalLeaderboard ,setFinalLeaderboard ,  setLeaderboard ,   setCurrentQuestion , displayLeaderboard,    roomUsername ,  setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
     const [didGameStart, setDidGameStart] = useState(false)
     const {jwt} = useUser()
     const {id} = useParams()
@@ -58,6 +59,10 @@ export const AdminRoom = () => {
 
         })
 
+        socketRef.current.on('final_leaderboard' , (leaderboard)=>{
+            setFinalLeaderboard && setFinalLeaderboard(leaderboard)
+        } )
+
         socketRef.current.on('correct-answer' , ()=>{
             if(setDidUserSubmit && setDidEveryoneSubmit){
                 setDidUserSubmit(false)
@@ -66,10 +71,12 @@ export const AdminRoom = () => {
         })
 
         socketRef.current.on('leaderboard' , (leaderboard)=>{
-            if(setDisplayLeaderboard && setDidEveryoneSubmit){
+            if(setDisplayLeaderboard && setDidEveryoneSubmit && setLeaderboard){
                 setDidEveryoneSubmit(false)
                 setDisplayLeaderboard(true)
+                setLeaderboard(leaderboard)
             }
+
         })
 
         return () => {
@@ -110,8 +117,12 @@ export const AdminRoom = () => {
                     :
                     <>
 
-                    {displayLeaderboard ?  <LeaderboardItem/>
-                     : <Question socketRef={socketRef}/>
+                    {displayLeaderboard ?
+                        finalLeaderboard ? <Results/>
+                            : <Leaderboard/>
+
+                     :
+                        <Question socketRef={socketRef}/>
                     }
 
 

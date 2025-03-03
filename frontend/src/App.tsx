@@ -6,9 +6,6 @@ import {Register} from "./components/Register.tsx";
 import {Home} from "./components/Home.tsx";
 import {MainLayout} from "./layouts/MainLayout.tsx";
 import {AdminRoom} from "./components/AdminRoom.tsx";
-import {Question} from "./components/Question.tsx";
-
-import {LeaderboardItem} from "./components/LeaderboardItem.tsx";
 import {Results} from "./components/Results.tsx";
 import {UserProvider} from "./context providers/UserProvider.tsx";
 import PrivateRouteLayout from "./layouts/PrivateRouteLayout.tsx";
@@ -21,10 +18,8 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Login/>} />
-                    <Route path="/leaderboard" element={<LeaderboardItem/>} />
 
                     <Route path='/results' element={<Results/>}/>
-                    <Route path='/question' element={<Question/>}/>
                     <Route path='/register' element={<Register/>}></Route>
 
 

@@ -22,7 +22,9 @@ export const WaitingRoom : FC<{startGame : MouseEventHandler<HTMLButtonElement> 
                             Go to <strong className='text-white'>quizzme.live</strong> <br/> and enter
                             <strong className='text-white'> {id?.toUpperCase()}</strong>
                         </p>
-                        <button
+                        <button onClick={async ()=>{
+                            await navigator.clipboard.writeText(`http://localhost:5173/room/${id}`)
+                            window.alert("Copied to clipboard!");}}
                             className=' cursor-pointer rounded-2xl text-white text-[.8rem] font-normal bg-[#3f33b0] py-1 px-2'>
                             Copy link
                         </button>
