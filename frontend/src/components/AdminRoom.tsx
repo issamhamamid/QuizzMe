@@ -7,11 +7,12 @@ import {useUser} from "../customHooks/useUser.ts";
 import {Socket} from "socket.io-client";
 import {WaitingRoom} from "./WaitingRoom.tsx";
 import {Question} from "./Question.tsx";
+import {LeaderboardItem} from "./LeaderboardItem.tsx";
 
 
 
 export const AdminRoom = () => {
-    const { roomUsername , connectedPlayers , setConnectedPlayers , timer , setTimer } = useContext(RoomContext) ?? {};
+    const {  setCurrentQuestion , displayLeaderboard,    roomUsername ,  setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
     const [didGameStart, setDidGameStart] = useState(false)
     const {jwt} = useUser()
     const {id} = useParams()
@@ -44,6 +45,33 @@ export const AdminRoom = () => {
             console.log(ex)
         })
 
+        socketRef.current.on('currentQuestion' , (question)=>{
+           if(setCurrentQuestion){
+               setCurrentQuestion(question)
+           }
+
+           if(setDisplayLeaderboard){
+               setDisplayLeaderboard(false)
+           }
+
+
+
+        })
+
+        socketRef.current.on('correct-answer' , ()=>{
+            if(setDidUserSubmit && setDidEveryoneSubmit){
+                setDidUserSubmit(false)
+                setDidEveryoneSubmit(true)
+            }
+        })
+
+        socketRef.current.on('leaderboard' , (leaderboard)=>{
+            if(setDisplayLeaderboard && setDidEveryoneSubmit){
+                setDidEveryoneSubmit(false)
+                setDisplayLeaderboard(true)
+            }
+        })
+
         return () => {
 
             if(socketRef.current){
@@ -66,19 +94,31 @@ export const AdminRoom = () => {
 
     return (
         <div className='flex flex-col'>
-            <div className='min-h-screen bg-[#5b4fcc] flex flex-col   text-white pt-4'>
-                <button
-                    className=' ml-4 w-34 mb-5 cursor-pointer text-lg  font-bold flex items-center gap-2 text-main-white bg-[#6459ce] py-1 px-4 rounded-full'>
-                    <IoSettingsSharp/>
-                    Settings
+            <div className='min-h-screen bg-[#5b4fcc] flex flex-col text-white pt-4  '>
 
-                </button>
-                {didGameStart ? <WaitingRoom startGame={startGame} id={id}/> :
+                {!didGameStart ?
+                    <>
+                        <button
+                            className=' ml-4 w-34 mb-5 cursor-pointer text-lg  font-bold flex items-center gap-2 text-main-white bg-[#6459ce] py-1 px-4 rounded-full'>
+                            <IoSettingsSharp/>
+                            Settings
 
-                     <Question/>
+                        </button>
+                        <WaitingRoom startGame={startGame} id={id}/>
+                    </>
+
+                    :
+                    <>
+
+                    {displayLeaderboard ?  <LeaderboardItem/>
+                     : <Question socketRef={socketRef}/>
+                    }
+
+
+
+
+                    </>
                 }
-
-
 
 
             </div>
