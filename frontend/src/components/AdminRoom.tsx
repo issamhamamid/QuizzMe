@@ -19,12 +19,12 @@ export const AdminRoom = () => {
 
 
     if(!roomUsername){
-        return(<Navigate to='/app/home'/>)
+        return(<Navigate to='/app'/>)
     }
 
 
 
-   useSocket(socketRef , roomUsername , id)
+   useSocket('admin', socketRef , roomUsername , id)
 
     const startGame = ()=>{
         if(socketRef.current && setDidGameStart){
@@ -48,7 +48,7 @@ export const AdminRoom = () => {
                             Settings
 
                         </button>
-                        <WaitingRoom startGame={startGame} id={id}/>
+                        <WaitingRoom isAdmin = {true} startGame={startGame} id={id}/>
                     </>
 
                     :

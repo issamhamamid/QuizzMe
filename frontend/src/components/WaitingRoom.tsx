@@ -1,7 +1,7 @@
-import {FC, MouseEventHandler, useContext} from "react";
+import {FC, useContext} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
 
-export const WaitingRoom : FC<{startGame : MouseEventHandler<HTMLButtonElement> , id : string | undefined}> = ({startGame, id} ) => {
+export const WaitingRoom : FC<{startGame : ()=> void , id : string | undefined , isAdmin : boolean}> = ({startGame, id , isAdmin} ) => {
 
     const {connectedPlayers} = useContext(RoomContext) ?? {}
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
@@ -55,10 +55,10 @@ export const WaitingRoom : FC<{startGame : MouseEventHandler<HTMLButtonElement> 
                     <div className='flex flex-col items-center text-white mb-4 '>
                         <div className='flex justify-between w-9/10 sm:w-122 items-center mb-5'>
                             <p className='text-xl'>{connectedPlayers.length} Players</p>
-                            <button onClick={startGame}
-                                    className=' font-extrabold hover:bg-[#22C55E] focus:bg-[#22C55E] cursor-pointer tracking-widest  rounded-sm py-4 px-12 bg-[#4ade80] text-[#14532d] '>START
+                            {isAdmin && <button onClick={startGame}
+                                                className=' font-extrabold hover:bg-[#22C55E] focus:bg-[#22C55E] cursor-pointer tracking-widest  rounded-sm py-4 px-12 bg-[#4ade80] text-[#14532d] '>START
                                 GAME
-                            </button>
+                            </button>}
 
                         </div>
 

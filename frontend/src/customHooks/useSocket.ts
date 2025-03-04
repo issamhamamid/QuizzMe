@@ -4,15 +4,28 @@ import {RoomContext} from "../context providers/RoomProvider.tsx";
 import {useUser} from "./useUser.ts";
 import {Socket} from "socket.io-client";
 
-export const useSocket = ( socketRef : RefObject<Socket | null>   , roomUsername : string , id :string | undefined)=>{
+export const useSocket = ( role : string ,   socketRef : RefObject<Socket | null>   , roomUsername : string , id :string | undefined)=>{
     const {jwt} = useUser()
-    const { setFinalLeaderboard ,  setLeaderboard ,   setCurrentQuestion ,   setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
+    const {setDidGameStart ,  setFinalLeaderboard ,  setLeaderboard ,   setCurrentQuestion ,   setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
     
     useEffect(() => {
         
         socketRef.current = socketConfig(roomUsername, jwt? jwt : '').connect();
 
-        socketRef.current.emit('create-room' , {roomId : id })
+        if(role === 'admin'){
+            socketRef.current.emit('create-room' , {roomId : id })
+        }
+
+        else {
+            socketRef.current.emit('join-room' , id )
+
+            socketRef.current.on('game_start' , ()=>{
+                    if(setDidGameStart){
+                        setDidGameStart(true)
+                    }
+            })
+        }
+
 
         socketRef.current.on('connected-players' , (players)=>{
             if(setConnectedPlayers){
