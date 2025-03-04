@@ -1,21 +1,19 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import {useContext, useEffect, useRef, useState} from "react";
+import {useContext, useRef} from "react";
 import {RoomContext} from "../context providers/RoomProvider.tsx";
 import {Navigate, useParams} from "react-router";
-import {socketConfig} from "../util/socket.ts";
-import {useUser} from "../customHooks/useUser.ts";
+
 import {Socket} from "socket.io-client";
 import {WaitingRoom} from "./WaitingRoom.tsx";
 import {Question} from "./Question.tsx";
 import {Leaderboard} from "./Leaderboard.tsx";
 import {Results} from "./Results.tsx";
+import {useSocket} from "../customHooks/useSocket.ts";
 
 
 
 export const AdminRoom = () => {
-    const {  finalLeaderboard ,setFinalLeaderboard ,  setLeaderboard ,   setCurrentQuestion , displayLeaderboard,    roomUsername ,  setConnectedPlayers , setTimer  , setDidUserSubmit , setDidEveryoneSubmit  , setDisplayLeaderboard} = useContext(RoomContext) ?? {};
-    const [didGameStart, setDidGameStart] = useState(false)
-    const {jwt} = useUser()
+    const { didGameStart, setDidGameStart ,  finalLeaderboard  , displayLeaderboard,    roomUsername } = useContext(RoomContext) ?? {};
     const {id} = useParams()
     const socketRef = useRef<Socket | null>(null)
 
@@ -26,71 +24,10 @@ export const AdminRoom = () => {
 
 
 
-    useEffect(() => {
-        socketRef.current = socketConfig(roomUsername, jwt? jwt : '').connect();
-
-        socketRef.current.emit('create-room' , {roomId : id })
-        socketRef.current.on('connected-players' , (players)=>{
-            if(setConnectedPlayers){
-                setConnectedPlayers(players)
-            }
-        })
-
-        socketRef.current.on('timer' , (timer)=>{
-            if(setTimer){
-                setTimer(timer)
-            }
-        })
-
-        socketRef.current.on('exception' , (ex)=>{
-            console.log(ex)
-        })
-
-        socketRef.current.on('currentQuestion' , (question)=>{
-           if(setCurrentQuestion){
-               setCurrentQuestion(question)
-           }
-
-           if(setDisplayLeaderboard){
-               setDisplayLeaderboard(false)
-           }
-
-
-
-        })
-
-        socketRef.current.on('final_leaderboard' , (leaderboard)=>{
-            setFinalLeaderboard && setFinalLeaderboard(leaderboard)
-        } )
-
-        socketRef.current.on('correct-answer' , ()=>{
-            if(setDidUserSubmit && setDidEveryoneSubmit){
-                setDidUserSubmit(false)
-                setDidEveryoneSubmit(true)
-            }
-        })
-
-        socketRef.current.on('leaderboard' , (leaderboard)=>{
-            if(setDisplayLeaderboard && setDidEveryoneSubmit && setLeaderboard){
-                setDidEveryoneSubmit(false)
-                setDisplayLeaderboard(true)
-                setLeaderboard(leaderboard)
-            }
-
-        })
-
-        return () => {
-
-            if(socketRef.current){
-             socketRef.current.disconnect();
-
-            }
-        };
-
-    }, []);
+   useSocket(socketRef , roomUsername , id)
 
     const startGame = ()=>{
-        if(socketRef.current){
+        if(socketRef.current && setDidGameStart){
             socketRef.current.emit('start-game')
             setDidGameStart(true)
         }

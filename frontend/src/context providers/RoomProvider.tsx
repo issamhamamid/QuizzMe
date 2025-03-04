@@ -21,6 +21,8 @@ type RoomContextType = {
     setLeaderboard : React.Dispatch<React.SetStateAction< Record<string, number> | null >>;
     finalLeaderboard : Record<string, number> | null;
     setFinalLeaderboard : React.Dispatch<React.SetStateAction< Record<string, number> | null >>;
+    didGameStart : boolean;
+    setDidGameStart : React.Dispatch<React.SetStateAction<boolean>>;
 
 }
 
@@ -38,9 +40,10 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined)
      const [displayLeaderboard, setDisplayLeaderboard] = useState<boolean | null>(null)
      const [leaderboard, setLeaderboard] = useState<Record<string, number> | null>(null)
      const [finalLeaderboard, setFinalLeaderboard] = useState<Record<string, number> | null>(null)
+     const [didGameStart, setDidGameStart] = useState(false)
 
     return (
-        <RoomContext.Provider value={{ finalLeaderboard , setFinalLeaderboard ,  leaderboard , setLeaderboard ,  displayLeaderboard , setDisplayLeaderboard , didEveryoneSubmit , setDidEveryoneSubmit , currentQuestion ,setCurrentQuestion , roomUsername, setRoomUsername , connectedPlayers , setConnectedPlayers , timer , setTimer , didUserSubmit, setDidUserSubmit }}>
+        <RoomContext.Provider value={{ didGameStart,setDidGameStart,  finalLeaderboard , setFinalLeaderboard ,  leaderboard , setLeaderboard ,  displayLeaderboard , setDisplayLeaderboard , didEveryoneSubmit , setDidEveryoneSubmit , currentQuestion ,setCurrentQuestion , roomUsername, setRoomUsername , connectedPlayers , setConnectedPlayers , timer , setTimer , didUserSubmit, setDidUserSubmit }}>
             {children}
         </RoomContext.Provider>
     );
