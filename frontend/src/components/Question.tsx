@@ -36,7 +36,7 @@ export const Question : FC<{socketRef : RefObject<Socket | null>}> = ({socketRef
                         <img
                             className=' h-full object-contain'
                             alt='media'
-                            src={currentQuestion ? currentQuestion.media_url : ''}
+                            src={currentQuestion?.media_url ?? undefined}
                         />
                     </div>
 

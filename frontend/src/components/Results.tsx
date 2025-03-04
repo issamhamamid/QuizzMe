@@ -1,10 +1,17 @@
 
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
+import {RoomContext} from "../context providers/RoomProvider.tsx";
+import {useContext} from "react";
 
 export const Results = () => {
 
     const { width, height } = useWindowSize()
+    const {finalLeaderboard} = useContext(RoomContext) ?? {}
+
+    const resultsArray = finalLeaderboard &&  Object.entries(finalLeaderboard).sort((a, b) => b[1] - a[1])
+    const topThree = resultsArray && resultsArray.slice(0,3)
+
     return (
         <>
 
@@ -24,9 +31,9 @@ export const Results = () => {
 
                  <div
                      className='bg-cyan-500 shadow-2xl  shadow-blue-400 w-4/13  flex flex-col   items-center justify-center  relative rounded-lg h-68 mt-auto'>
-                     <div
-                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>Issam
-                     </div>
+                     {topThree?.[1]?.[0] && <div
+                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>{topThree?.[1]?.[0]}
+                     </div>}
                      <p className=' text-black opacity-20 text-[11rem] mt-38 '>2</p>
                  </div>
                  <div
@@ -45,32 +52,40 @@ export const Results = () => {
                          <img src='https://avatars.saasmates.workers.dev/svg?isCircle=false ' alt='avatar'
                               className='object-cover h-[7rem] '/>
                      </div>
-                     <div
-                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>Issamff
-                     </div>
+                     {topThree?.[0]?.[0] && <div
+                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>{topThree?.[0]?.[0]}
+                     </div>}
 
                      <p className=' text-black opacity-20 text-[11rem] mt-49 '>1</p>
                  </div>
                  <div
                      className=' relative bg-[#e879f9] shadow-2xl shadow-pink-400  w-4/13 flex flex-col items-center justify-center rounded-lg h-50 mt-auto'>
-                     <div
-                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>ISM
-                     </div>
+
+
+                     {topThree?.[2]?.[0] && <div
+                         className=' shadow-lg shadow-yellow-800 rounded-lg bg-[#fef08a]  p-2 absolute -top-3 text-[#a16207] font-bold '>{topThree?.[2]?.[0]}
+                     </div>}
                      <p className=' text-black opacity-20 text-[11rem] mt-19  '>3</p>
                  </div>
              </div>
 
              <div className=' w-9/10 md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold '>
-                   <div className='flex justify-evenly bg-sidebar-hover-bg w-full  py-3 rounded-t-3xl' >
-                        <p className='w-1/3 text-center'>Rank</p>
-                        <p className='w-1/3 text-center'>Player</p>
-                        <p className='w-1/3 text-center'>Score</p>
-                   </div>
-                 <div className='flex bg-[#5b4fcc]  py-3 justify-between rounded-b-2xl w-full '>
-                     <p className='w-1/3 text-center'>1</p>
-                     <p className='w-1/3 text-center'>Idfd</p>
-                     <p className='w-1/3 text-center'>600</p>
+                 <div className='flex justify-evenly bg-sidebar-hover-bg w-full  py-3 rounded-t-3xl'>
+                     <p className='w-1/3 text-center'>Rank</p>
+                     <p className='w-1/3 text-center'>Player</p>
+                     <p className='w-1/3 text-center'>Score</p>
                  </div>
+                 { resultsArray &&
+                     resultsArray.map(([key , value]  , index)=> {
+                         return <div key={key}
+                             className='flex bg-[#5b4fcc]  py-3 justify-between  w-full  border-b-2 border-x-2 border-[#2F2684]   '>
+                             <p className='w-1/3 text-center'>{index+ 1}</p>
+                             <p className='w-1/3 text-center'>{key}</p>
+                             <p className='w-1/3 text-center'>{value}</p>
+                         </div>
+                     })
+                 }
+
 
              </div>
 
