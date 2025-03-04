@@ -5,6 +5,7 @@ export const WaitingRoom : FC<{startGame : ()=> void , id : string | undefined ,
 
     const {connectedPlayers} = useContext(RoomContext) ?? {}
     const image_link : string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FNN8mCgTkX7eaGbhSs8xDCGTJTFnYnEaeg&s"
+
     return (
         <>
 
@@ -64,10 +65,11 @@ export const WaitingRoom : FC<{startGame : ()=> void , id : string | undefined ,
 
 
                         {connectedPlayers.map((player) => {
+                            const avatarUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(player)}`;
                             return (
                                 <div key={player}
                                      className='bg-[#3f33b0]  w-9/10 sm:w-122 rounded-3xl flex items-center py-1 mb-3 px-5 gap-3 '>
-                                    <img src='https://avatars.saasmates.workers.dev/svg?isCircle=true'
+                                    <img src={avatarUrl}
                                          alt='avatar'
                                          className='h-[4em] mb-2'/>
                                     <p>{player}</p>

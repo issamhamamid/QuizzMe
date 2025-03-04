@@ -16,6 +16,8 @@ export const Results = () => {
         window.location.href = "/app";
     }
 
+    const avatarUrl = topThree?.[0]?.[0] ?  `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(topThree?.[0]?.[0] )}` : "random"
+
     return (
         <>
 
@@ -53,7 +55,7 @@ export const Results = () => {
                      </svg>
 
                      <div className='rounded-full bg-yellow-400 border-5 border-yellow-300 absolute top-10 h-[7em] overflow-hidden'>
-                         <img src='https://avatars.saasmates.workers.dev/svg?isCircle=false ' alt='avatar'
+                         <img src={avatarUrl} alt='avatar'
                               className='object-cover h-[7rem] '/>
                      </div>
                      {topThree?.[0]?.[0] && <div

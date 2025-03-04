@@ -1,6 +1,6 @@
 import { IoSettingsSharp } from "react-icons/io5";
-import {useContext,useRef} from "react";
-import { useParams} from "react-router";
+import {useContext, useEffect, useRef} from "react";
+import {useNavigate, useParams} from "react-router";
 import {useUser} from "../customHooks/useUser.ts";
 import {jwtDecode} from "jwt-decode";
 import {JwtPayload} from "../types/types.ts";
@@ -15,14 +15,25 @@ import {Question} from "./Question.tsx";
 
 export const UserRoom = () => {
 
-    const {jwt} = useUser()
     const {id} = useParams()
+    const {jwt} = useUser()
     const username = jwtDecode<JwtPayload>(jwt ? jwt : "").username
     const socketRef = useRef<Socket | null>(null)
     const {  didGameStart, finalLeaderboard  , displayLeaderboard } = useContext(RoomContext) ?? {};
-
+    const navigate = useNavigate()
     useSocket("user" , socketRef , username , id  )
 
+    useEffect(() => {
+        // Use the modern Performance API to detect page reload
+        // Properly type the navigation entries as PerformanceNavigationTiming
+        const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+
+        const wasReloaded = navigationEntries.length > 0 && navigationEntries[0].type === 'reload';
+
+        if (wasReloaded) {
+            navigate('/app');
+        }
+    }, [navigate]);
 
 
     return (
