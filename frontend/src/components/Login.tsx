@@ -4,11 +4,13 @@ import axios from "axios";
 
 import {useNavigate} from "react-router";
 import {useUser} from "../customHooks/useUser.ts";
+import {useLocation} from "react-router";
 
 export const Login : FC = () => {
 
     const navigate = useNavigate()
     const {setJwt} = useUser()
+    const location = useLocation()
     const submit =async  (prev : any , formData : any)=>{
         const data : {username : string , password: string , error? : any} = {
             username : formData.get('username'),
@@ -19,7 +21,8 @@ export const Login : FC = () => {
             const response = await axios.post<{token : string}>('http://localhost:3000/auth/login' , data)
             if(response.status === 200 || 201){
                 setJwt(response.data.token)
-                navigate('app/home')
+                const destination = location.state ?? 'app/home'
+                navigate(destination)
 
             }
         }

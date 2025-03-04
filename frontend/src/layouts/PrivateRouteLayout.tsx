@@ -4,6 +4,7 @@ import axios from "axios";
 import {useEffect, useState} from "react";
 import {Loading} from "../components/Loading.jsx";
 import {RoomProvider} from "../context providers/RoomProvider.tsx";
+import {useLocation} from "react-router";
 
 const PrivateRouteLayout = () => {
 
@@ -11,7 +12,7 @@ const PrivateRouteLayout = () => {
 
     const [isValid, setIsValid] = useState<boolean | null>(null);
     const [isLoadig, setisLoadig] = useState<boolean>(true)
-
+    const {pathname } = useLocation();
 
     useEffect(() => {
 
@@ -32,7 +33,7 @@ const PrivateRouteLayout = () => {
 
     return (
         <RoomProvider>
-            {isLoadig ? <Loading/> : isValid ? <Outlet/> : <Navigate to='/'/>}
+            {isLoadig ? <Loading/> : isValid ? <Outlet/> : <Navigate state={pathname}  to='/'/>}
         </RoomProvider>
     )
 }

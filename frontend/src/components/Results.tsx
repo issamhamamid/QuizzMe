@@ -12,6 +12,10 @@ export const Results = () => {
     const resultsArray = finalLeaderboard &&  Object.entries(finalLeaderboard).sort((a, b) => b[1] - a[1])
     const topThree = resultsArray && resultsArray.slice(0,3)
 
+    const returnHome = ()=>{
+        window.location.href = "/app";
+    }
+
     return (
         <>
 
@@ -69,7 +73,7 @@ export const Results = () => {
                  </div>
              </div>
 
-             <div className=' w-9/10 md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold '>
+             <div className=' w-9/10 md:w-122 rounded-2xl mt-10 flex flex-col text-white font-semibold mb-4 '>
                  <div className='flex justify-evenly bg-sidebar-hover-bg w-full  py-3 rounded-t-3xl'>
                      <p className='w-1/3 text-center'>Rank</p>
                      <p className='w-1/3 text-center'>Player</p>
@@ -88,7 +92,7 @@ export const Results = () => {
 
 
              </div>
-
+                <button onClick={returnHome} className=' hover:bg-red-600 uppercase cursor-pointer tracking-wider px-3 py-2 bg-red-500 rounded-lg '>Return to the home Page</button>
          </div>
         </>
     );
