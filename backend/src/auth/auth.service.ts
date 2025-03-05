@@ -19,10 +19,23 @@ export class AuthService {
     }
   }
 
-  async login(user: any) {
+  login(user: any) {
     const payload = { username: user.username, sub: user.id };
     return {
       token: this.jwtService.sign(payload),
     };
+  }
+
+  validateToken(token: string): { isValid: boolean } {
+    try {
+      this.jwtService.verify(token);
+      return {
+        isValid: true,
+      };
+    } catch (err) {
+      return {
+        isValid: false,
+      };
+    }
   }
 }

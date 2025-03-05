@@ -10,6 +10,7 @@ import { UserService } from './user.service';
 import { createUserDto, createUserSchema } from '../dtos/createUserDto.dto';
 import { ZodValidationPipe } from '../customPipes/zodValidationPipe';
 import { UsersInterceptor } from '../interceptors/users.interceptors';
+import { Public } from '../auth/public.decorator';
 
 @Controller('users')
 export class UserController {
@@ -21,7 +22,8 @@ export class UserController {
     return await this.userService.getUsers();
   }
 
-  @Post()
+  @Post('register')
+  @Public()
   @UsePipes(new ZodValidationPipe(createUserSchema))
   async createUser(@Body() user: createUserDto) {
     await this.userService.createUser(user);

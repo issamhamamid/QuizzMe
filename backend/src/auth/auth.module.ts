@@ -26,7 +26,7 @@ import { APP_GUARD } from '@nestjs/core';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.SECRET, // This will always get the latest value
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '10h' },
       }),
     }),
   ],

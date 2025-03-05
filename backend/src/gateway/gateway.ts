@@ -8,17 +8,19 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { Inject, UseGuards } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { QuestionsService } from '../questions/questions.service';
 import { Question } from '../entities/question.entity';
 import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
 import { WebSocketConnectionMiddleware } from '../middlewares/sockets.middleware';
 import { CustomSocket } from '../types/CustomSocket';
-import { WsGuard } from '../guards/ws-guard';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: ['http://localhost:5173'],
+  },
+})
 export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
   private QUESTION_TIME = 15;
 
@@ -41,11 +43,18 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
       `${client.data.room}:players`,
       client.data.username,
     );
+    const players = await this.redisClient.smembers(
+      `${client.data.room}:players`,
+    );
+    this.server.to(client.data.room).emit('connected-players', players);
   }
 
   @SubscribeMessage('create-room')
-  async createRoom(@ConnectedSocket() client: CustomSocket) {
-    const roomId = uuidv4().replace(/-/g, '').slice(-8);
+  async createRoom(
+    @ConnectedSocket() client: CustomSocket,
+    @MessageBody() data: { roomId: string },
+  ) {
+    const roomId = data.roomId;
     await client.join(roomId);
     client.data.room = roomId;
     await this.redisClient.sadd(`${roomId}:players`, client.data.username);
@@ -78,21 +87,21 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
     await client.join(room);
     client.data.room = room;
     await this.redisClient.sadd(`${room}:players`, client.data.username);
-    this.server
-      .to(room)
-      .emit('joining', `${client.data.username} joined the room`);
+    const players = await this.redisClient.smembers(`${room}:players`);
+    this.server.to(room).emit('connected-players', players);
   }
 
   @SubscribeMessage('leave-room')
   async leaveRoom(@ConnectedSocket() client: CustomSocket) {
     if (client.data.room) {
-      this.server
-        .to(client.data.room)
-        .emit('leaving', `${client.data.username} left the room`);
       await this.redisClient.srem(
         `${client.data.room}:players`,
         client.data.username,
       );
+      const players = await this.redisClient.smembers(
+        `${client.data.room}:players`,
+      );
+      this.server.to(client.data.room).emit('connected-players', players);
     }
   }
 
@@ -114,6 +123,7 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
     }
 
     if (curRoom) {
+      this.server.to(curRoom).emit('game_start', 'game started');
       const questions: Question[] =
         await this.questionsService.generateRoomQuestion();
       if (questions.length === 0) return; // Prevent errors if no questions
@@ -137,34 +147,39 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
       let leaderboardShown = false;
 
       let isProcessing = false; // Flag to check if the game loop is already processing an iteration
-      let leaderboardTimer: null | number = null;
+      let pauseTimer: null | number = null;
 
       const gameLoop = async () => {
         if (isProcessing) return; // If an iteration is already in progress, skip this one
 
         isProcessing = true; // Set flag to indicate processing has started
 
-        if (leaderboardTimer) {
-          leaderboardTimer--;
+        if (pauseTimer) {
+          pauseTimer--;
         }
 
         if (
           !leaderboardShown &&
           (questionTimer === 0 || (await this.didEveryoneSubmit(curRoom)))
         ) {
+          this.server.to(curRoom).emit('correct-answer', 'correct');
+
+          leaderboardShown = true;
+          pauseTimer = 8;
+        }
+
+        if (pauseTimer === 5) {
           const new_scores = await this.updateScores(curRoom);
           this.server.to(curRoom).emit('leaderboard', new_scores);
           await this.redisClient.del(`${client.data.room}:answers`);
-          leaderboardShown = true;
-          leaderboardTimer = 5;
         }
 
-        if (questionTimer > 0 && leaderboardTimer === null) {
+        if (questionTimer > 0 && pauseTimer === null) {
           this.server.to(curRoom).emit('timer', questionTimer);
           questionTimer--;
         }
 
-        if (leaderboardTimer === 0) {
+        if (pauseTimer === 0) {
           currentQuestionIndex++;
 
           if (currentQuestionIndex >= questions.length) {
@@ -193,7 +208,7 @@ export class RoomGateWay implements OnGatewayInit, OnGatewayDisconnect {
 
           questionTimer = this.QUESTION_TIME; // Reset timer for the next question
           leaderboardShown = false;
-          leaderboardTimer = null;
+          pauseTimer = null;
         }
 
         isProcessing = false; // Reset flag after processing the current iteration

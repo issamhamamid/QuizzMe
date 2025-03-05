@@ -2,7 +2,7 @@
 import {FC, useActionState} from "react";
 import axios from "axios";
 
-import {useNavigate} from "react-router";
+import {Link, useNavigate} from "react-router";
 import {useUser} from "../customHooks/useUser.ts";
 import {useLocation} from "react-router";
 
@@ -21,7 +21,7 @@ export const Login : FC = () => {
             const response = await axios.post<{token : string}>('http://localhost:3000/auth/login' , data)
             if(response.status === 200 || 201){
                 setJwt(response.data.token)
-                const destination = location.state ?? 'app/home'
+                const destination = location.state ?? '/app'
                 navigate(destination)
 
             }
@@ -75,10 +75,6 @@ export const Login : FC = () => {
 
                             </div>
                         </div>
-                        <div className='flex justify-between font-light mb-6'>
-                            <a>Remember me</a>
-                            <a className='cursor-pointer '>Forgot your password?</a>
-                        </div>
                         <button
                             className=' pt-2 pb-1 cursor-pointer text-[1.3rem] font-semibold w-full bg-[#786fd5] rounded-lg  '
                             type="submit">Log in
@@ -88,7 +84,7 @@ export const Login : FC = () => {
 
                     <div className='flex gap-3 font-light text-[.915rem] '>
                         <p>Don't have an account?</p>
-                        <a className=' block cursor-pointer underline hover:text-link-hover'>Sign up for free</a>
+                        <Link to='register' className=' block cursor-pointer underline hover:text-link-hover'>Sign up for free</Link>
                     </div>
 
                 </div>
