@@ -1,15 +1,14 @@
 import {useActionState} from "react";
 import axios from "axios";
-import {Link, useLocation, useNavigate} from "react-router";
-import {useUser} from "../customHooks/useUser.ts";
+import {Link, useNavigate} from "react-router";
 
 export const Register = () => {
 
     const navigate = useNavigate()
-    const {setJwt} = useUser()
 
 
-    const submit =async  (prev : any , formData : any)=>{
+
+    const submit =async  (_prev : any , formData : any)=>{
 
         const data : {username : string , email : string , full_name : string ,  password: string , role : string , error? : any} = {
             username : formData.get('username'),
@@ -36,7 +35,7 @@ export const Register = () => {
         return data
     }
 
-    const [data  ,submitAction , isPending] = useActionState(submit ,  null);
+    const [data  ,submitAction] = useActionState(submit ,  null);
     return (
         <div
             style={{
@@ -51,7 +50,7 @@ export const Register = () => {
 
             <div className=' shadow-xl p-8 justify-items-center w-96  bg-[#5b4fcc] mx-auto rounded-xl flex-col '>
                 <img alt='quizzme-logo' className='w-5/6 mb-3'
-                     src="/src/assets/logo.png"/>
+                     src="/logo.png"/>
                 {data?.error  &&
                     data.error.map((err : any)=> {
                         return <p key={err.message} className='text-red-700 justify-self-start text-[.83rem] mb-1 '>{err.message}</p>

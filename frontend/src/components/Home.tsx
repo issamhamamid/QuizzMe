@@ -34,7 +34,7 @@ export const Home = () => {
 
     return (
         <main className='min-h-screen bg-[#5b4fcc] pt-15 '>
-            <img src='/src/assets/logo.png' alt='logo' className='w-80 mx-auto mb-15'/>
+            <img src='/logo.png' alt='logo' className='w-80 mx-auto mb-15'/>
             <div className=' p-7 mx-auto w-96 bg-sidebar-hover-bg rounded-sm flex flex-col items-center  '>
                 <h1 className='text-white font-semibold text-4xl mb-3'>PLAY</h1>
                 <img src={avatarUrl} alt='avatar' className='h-[12em] mb-6'/>

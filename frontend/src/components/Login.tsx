@@ -11,7 +11,7 @@ export const Login : FC = () => {
     const navigate = useNavigate()
     const {setJwt} = useUser()
     const location = useLocation()
-    const submit =async  (prev : any , formData : any)=>{
+    const submit =async  (_prev : any , formData : any)=>{
         const data : {username : string , password: string , error? : any} = {
             username : formData.get('username'),
             password : formData.get('password')
@@ -35,7 +35,7 @@ export const Login : FC = () => {
     }
 
 
-    const [data  ,submitAction , isPending] = useActionState(submit ,  null);
+    const [data  ,submitAction ] = useActionState(submit ,  null);
 
     return (
 
@@ -53,7 +53,7 @@ export const Login : FC = () => {
 
                 <div className=' shadow-xl p-8 justify-items-center w-96  bg-[#5b4fcc] mx-auto rounded-xl flex-col '>
                     <img alt='quizzme-logo' className='w-5/6 mb-3'
-                         src="/src/assets/logo.png"/>
+                         src="/logo.png"/>
                     {data?.error?.statusCode === 401 &&
                         <p className='text-red-700 justify-self-start text-[.95rem] mb-3 '>Invalid username or
                             password</p>}
