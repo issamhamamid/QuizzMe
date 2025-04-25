@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - quizme-data:/var/lib/postgresql/data
+
+  frontend:
+    image: quizmefront
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: quizmebackend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - postgres
+
+volumes:
+  quizme-data:
+    external: true
